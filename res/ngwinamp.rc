@@ -1,0 +1,368 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ADMIN DIALOGEX 0, 0, 450, 351
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "NGWinamp : remote control client (admin)"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_HOSTNAME,150,338,100,9,ES_AUTOHSCROLL | NOT 
+                    WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_HOSTPORT,260,338,34,9,ES_AUTOHSCROLL | ES_NUMBER | 
+                    NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_PASSWORD,339,338,50,9,ES_PASSWORD | ES_AUTOHSCROLL | 
+                    NOT WS_BORDER,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "connect",IDC_CONNECT,393,338,50,12,0,WS_EX_STATICEDGE
+    CONTROL         "Slider1",IDC_SONGSLIDE,"msctls_trackbar32",
+                    TBS_AUTOTICKS | WS_DISABLED | WS_TABSTOP,13,16,170,19
+    PUSHBUTTON      "<<< prev.",IDC_PREV,13,36,35,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "play |>",IDC_PLAY,49,36,35,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "pause ||",IDC_PAUSE,85,36,35,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "stop |^|",IDC_STOP,121,36,35,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "next >>>",IDC_NEXT,157,36,35,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    CONTROL         "Slider2",IDC_VOLUMESLIDE,"msctls_trackbar32",
+                    TBS_AUTOTICKS | WS_DISABLED | WS_TABSTOP,269,19,125,10
+    CONTROL         "Slider2",IDC_PANSLIDE,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    WS_DISABLED | WS_TABSTOP,269,33,125,10
+    CONTROL         "List1",IDC_PLAYLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | 
+                    LVS_NOSORTHEADER | WS_DISABLED | WS_TABSTOP,13,51,424,
+                    268,WS_EX_STATICEDGE
+    PUSHBUTTON      "refresh",IDC_REFRESH,13,321,30,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "clear",IDC_CLEAR,44,321,30,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "++",IDC_ADD,78,321,20,12,WS_DISABLED,WS_EX_STATICEDGE
+    PUSHBUTTON      "--",IDC_DEL,99,321,20,12,WS_DISABLED,WS_EX_STATICEDGE
+    CONTROL         "Spin1",IDC_MOVE,"msctls_updown32",UDS_ARROWKEYS | 
+                    UDS_HOTTRACK | WS_DISABLED | WS_TABSTOP,122,321,10,11
+    CONTROL         "shuffle",IDC_SHUFFLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,135,323,34,8
+    CONTROL         "repeat",IDC_REPEAT,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,173,323,34,8
+    PUSHBUTTON      "rem. dead",IDC_DEAD,213,321,40,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "randomize",IDC_RANDOMIZE,257,321,40,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "sort",IDC_SORT,298,321,30,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "help",IDC_HELPDOC,417,321,20,12,0,WS_EX_STATICEDGE
+    EDITTEXT        IDC_SNPOS,183,15,57,9,ES_AUTOHSCROLL | ES_READONLY | 
+                    ES_NUMBER | WS_DISABLED | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_SNPERCENT,183,25,57,9,ES_AUTOHSCROLL | ES_READONLY | 
+                    ES_NUMBER | WS_DISABLED | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_VOLUME,397,18,40,9,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY | ES_NUMBER | WS_DISABLED | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    EDITTEXT        IDC_PAN,397,32,40,9,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY | ES_NUMBER | WS_DISABLED | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    GROUPBOX        "remote playlist && controls  :",IDC_STATIC,7,7,436,329
+    LTEXT           " :",IDC_STATIC,252,338,8,10
+    RTEXT           "volume",IDC_STATIC,241,19,25,8
+    RTEXT           "pan",IDC_STATIC,241,33,25,8
+    RTEXT           "host :",IDC_STATIC,125,338,22,8
+    RTEXT           "password :",IDC_STATIC,298,338,38,8
+    LTEXT           "(c) 2005 - by nitro - v1.1.1",IDC_STATIC,1,341,85,8,
+                    WS_DISABLED
+END
+
+IDD_USER DIALOGEX 0, 0, 416, 314
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "NGWinamp : remote control client (user)"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_HOSTNAME,207,302,100,9,ES_AUTOHSCROLL | NOT 
+                    WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_HOSTPORT,317,302,34,9,ES_AUTOHSCROLL | ES_NUMBER | 
+                    NOT WS_BORDER,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "connect",IDC_CONNECT,359,301,50,12,0,WS_EX_STATICEDGE
+    CONTROL         "List1",IDC_PLAYLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | 
+                    LVS_NOSORTHEADER | WS_DISABLED | WS_TABSTOP,13,18,390,
+                    263,WS_EX_STATICEDGE
+    PUSHBUTTON      "refresh",IDC_REFRESH,13,283,30,12,WS_DISABLED,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "++",IDC_ADD,47,283,20,12,WS_DISABLED,WS_EX_STATICEDGE
+    PUSHBUTTON      "help",IDC_HELPDOC,383,283,20,12,0,WS_EX_STATICEDGE
+    GROUPBOX        "remote playlist :",IDC_STATIC,7,7,402,293
+    LTEXT           " :",IDC_STATIC,309,302,8,10
+    RTEXT           "host :",IDC_STATIC,182,302,22,8
+    LTEXT           "(c) 2005 - by nitro - v1.1.1",IDC_STATIC,1,304,87,8,
+                    WS_DISABLED
+END
+
+IDD_BROWSER DIALOGEX 0, 0, 378, 250
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "NGWinamp : remote control client (file-browser)"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_PATH,42,17,323,12,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    CBS_SORT | CBS_LOWERCASE | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "refresh",IDC_REFRESH,13,226,30,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "++",IDC_ADD,45,226,20,12,0,WS_EX_STATICEDGE
+    CONTROL         "List1",IDC_CONTENT,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | 
+                    LVS_NOSORTHEADER | WS_TABSTOP,13,48,351,176,
+                    WS_EX_STATICEDGE
+    GROUPBOX        "location :",IDC_STATIC,7,7,364,28
+    GROUPBOX        "content :",IDC_STATIC,7,38,364,205
+    RTEXT           "paths :",IDC_STATIC,15,19,24,8
+END
+
+IDD_CONFIG DIALOGEX 0, 0, 353, 214
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "NGWinamp server configuration"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_LISTEN,77,19,88,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PORT,77,34,40,12,ES_NUMBER
+    EDITTEXT        IDC_SVMAXCON,77,49,40,12,ES_NUMBER
+    EDITTEXT        IDC_BUFFERSIZE,77,64,40,12,ES_NUMBER
+    EDITTEXT        IDC_ALLOWIP,77,79,88,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DENYIP,77,94,88,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PASSWORD,77,109,88,12,ES_PASSWORD
+    CONTROL         "enable",IDC_ANONYMOUS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,16,141,43,8
+    EDITTEXT        IDC_ANONMAXCON,77,150,40,12,ES_NUMBER | WS_DISABLED
+    EDITTEXT        IDC_ANONTIMEOUT,77,165,40,12,WS_DISABLED
+    EDITTEXT        IDC_ADDPERHOUR,77,181,40,12,WS_DISABLED
+    CONTROL         "show disk roots",IDC_ROOTSHARE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,189,20,84,8
+    CONTROL         "show network shares",IDC_NETSHARE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,189,30,84,8
+    EDITTEXT        IDC_NETSHAREREFRESH,242,40,40,12,WS_DISABLED
+    CONTROL         "show this directories :",IDC_DIRSHARE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,189,54,84,8
+    LISTBOX         IDC_PATHS,187,64,151,83,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_DISABLED | NOT WS_BORDER | WS_VSCROLL | WS_TABSTOP,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "+",IDC_ADD,309,149,14,12,WS_DISABLED,WS_EX_STATICEDGE
+    PUSHBUTTON      "x",IDC_DEL,324,149,14,12,WS_DISABLED,WS_EX_STATICEDGE
+    EDITTEXT        IDC_EXTSFILTER,238,164,100,12,ES_LOWERCASE | 
+                    ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "Save",IDC_SAVE,301,197,45,14,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Close",IDC_CLOSE,255,197,45,14,0,WS_EX_STATICEDGE
+    GROUPBOX        "Network options",IDC_STATIC,7,9,166,118
+    RTEXT           "listen on ip : *",IDC_STATIC,14,20,61,8
+    RTEXT           "tcp port : *",IDC_STATIC,14,35,61,8
+    RTEXT           "buffersize :",IDC_STATIC,37,65,38,8
+    RTEXT           "password :",IDC_STATIC,37,110,38,8
+    RTEXT           "max connections :",IDC_STATIC,14,50,61,8
+    RTEXT           "allow only this ips :",IDC_STATIC,14,79,61,8
+    RTEXT           "deny this ips :",IDC_STATIC,27,94,48,8
+    GROUPBOX        "File browsing options",IDC_STATIC,180,9,166,174
+    RTEXT           "refresh :",IDC_STATIC,198,41,42,8
+    GROUPBOX        "Anonymous access",IDC_STATIC,7,130,166,70
+    RTEXT           "file-ext filter :",IDC_STATIC,187,166,48,8
+    RTEXT           "max connections :",IDC_STATIC,14,151,61,8
+    RTEXT           "timeout :",IDC_STATIC,14,166,61,8
+    RTEXT           "nb files per hour :",IDC_STATIC,14,182,61,8
+    PUSHBUTTON      "help",IDC_HELPDOC,225,197,30,14,0,WS_EX_STATICEDGE
+    LTEXT           "(*) need to restart winamp",IDC_STATIC,7,0,87,8,
+                    WS_DISABLED
+    LTEXT           "(c) 2004-2005 - by nitro - v1.1.1",IDC_STATIC,7,203,108,
+                    8,WS_DISABLED
+    LTEXT           "[s]",IDC_STATIC,285,41,15,8
+    LTEXT           "[s]",IDC_STATIC,121,166,10,8
+    LTEXT           "[bytes]",IDC_STATIC,121,66,23,8
+    CONTROL         "plugin state (enable/disable)",IDC_PLUGINENABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,185,186,108,8
+END
+
+IDD_HELP DIALOGEX 0, 0, 307, 226
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "NGWinamp Help Reader"
+FONT 8, "Courier New", 400, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_HELPTEXT,1,1,305,224,ES_MULTILINE | ES_READONLY | 
+                    NOT WS_BORDER | WS_VSCROLL | NOT WS_TABSTOP,
+                    WS_EX_STATICEDGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ADMIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 443
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 344
+    END
+
+    IDD_USER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 409
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 307
+    END
+
+    IDD_BROWSER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 371
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 243
+    END
+
+    IDD_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 346
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 207
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_SONG                ICON                    "song.ico"
+IDI_DEFAULT             ICON                    "default.ico"
+IDI_CURRENT             ICON                    "current.ico"
+IDI_DIRECTORY           ICON                    "directory.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,1,1,0
+ PRODUCTVERSION 1,1,1,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Release date : 13/01/2005"
+            VALUE "FileDescription", "Remote control plugin for Winamp V2.x & V5.x"
+            VALUE "FileVersion", "1, 1, 1, 0"
+            VALUE "InternalName", "NGWinamp"
+            VALUE "LegalCopyright", "by nitro@webmails.com"
+            VALUE "LegalTrademarks", "Freeware !!"
+            VALUE "OriginalFilename", "gen_ngwinamp.dll"
+            VALUE "ProductName", "NGWinamp"
+            VALUE "ProductVersion", "1, 1, 1, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// French (Switzerland) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRS)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH_SWISS
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // French (Switzerland) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
