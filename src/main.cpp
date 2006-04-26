@@ -2,22 +2,6 @@
 #include "global.h"
 
 
-BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
-	WSADATA wd;
-
-	switch (reason) {
-	case DLL_PROCESS_ATTACH:
-		WSAStartup(MAKEWORD(2, 0), &wd);
-		break;
-
-	case DLL_PROCESS_DETACH:
-		WSACleanup();
-		break;
-	}
-	return TRUE;
-}
-
-
 
 /*
 // initialise le plugin

@@ -282,10 +282,24 @@ public:
 string strtrim(const string &value);
 string strstrip(const string &value, const string &separator);
 vector<string> strsplit(const string &value, const string &separator, dword limit);
-vector<string> getdirectoryitems(const string &filename);
+vector<string> getdirectoryitems(const string &filename, const vector<string> &exts);
 bool pathisurl(const string &filename);
 bool pathisfile(const string &filename);
 bool pathisdirectory(const string &filename);
+
+#ifdef _DEBUG
+void debugclear();
+void debugwrite(const char *text);
+
+#define DEBUGCLEAR			debugclear()
+#define DEBUGWRITE(text)	debugwrite(text)
+
+#else
+
+#define DEBUGCLEAR			
+#define DEBUGWRITE(text)	
+
+#endif
 
 
 #endif //_UTIL_H_INCLUDE_

@@ -96,17 +96,20 @@ void NGWINAMPSERVER::readcfg(const string &filename) {
 			puser->setpolicies(puser->parsepolicies(user.getchild("access")), user.getchild("connection").getuint(), user.getchild("timeout").getfloat());
 			this->users.push_back(puser);
 
-//			PLUGIN::debug(user.getname().c_str());
+//			DEBUGWRITE(user.getname().c_str());
 		}
 	}
 
 
 	CFGNode shares = server.getchild("shares");
+	vector<string> exts;
 
 	for (dword i = 0; i < shares.size(); i++) {
-//		PLUGIN::debug(shares.getchild(i).getname().c_str());
+//		DEBUGWRITE(shares.getchild(i).getname().c_str());
 	}
-//	this->shares.add(FSNode("C:\\Downloads"));
+	exts.push_back(".zip");
+	exts.push_back(".txt");
+	this->shares.add(FSNode("C:\\Downloads", exts, true));
 }
 
 void NGWINAMPSERVER::savecfg(const string &filename) {
@@ -131,22 +134,22 @@ bool NGWINAMPSERVER::init(void) {
 
 	this->swait = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (this->swait == INVALID_SOCKET) {
-		PLUGIN::debug("NGWINAMPSERVER::init() cannot create socket !");
+		DEBUGWRITE("NGWINAMPSERVER::init() cannot create socket !");
 		return false;
 	}
 	if (bind(this->swait, (const struct sockaddr*)&addr, sizeof(SOCKADDR_IN)) != 0) {
-		PLUGIN::debug("NGWINAMPSERVER::init() cannot bind !");
+		DEBUGWRITE("NGWINAMPSERVER::init() cannot bind !");
 		return false;
 	}
 	if (listen(this->swait, this->cfg_connection) != 0) {
-		PLUGIN::debug("NGWINAMPSERVER::init() cannot listen !");
+		DEBUGWRITE("NGWINAMPSERVER::init() cannot listen !");
 		return false;
 	}
 	if (ioctlsocket(this->swait, FIONBIO, &enabled) != 0) {
-		PLUGIN::debug("NGWINAMPSERVER::init() cannot change ioctl !");
+		DEBUGWRITE("NGWINAMPSERVER::init() cannot change ioctl !");
 		return false;
 	}
-	PLUGIN::debug("NGWINAMPSERVER::init()");
+	DEBUGWRITE("NGWINAMPSERVER::init()");
 	return true;
 }
 
@@ -173,7 +176,7 @@ void NGWINAMPSERVER::free() {
 	ResetEvent(this->hquit);
 	ResetEvent(this->hrunning);
 
-	PLUGIN::debug("NGWINAMPSERVER::free()");
+	DEBUGWRITE("NGWINAMPSERVER::free()");
 }
 
 
@@ -262,7 +265,7 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 
 	char tmp[512];
 	sprintf(tmp, "NGWINAMPSERVER::main() request (code=%u,param1=%08X,param2=%08X,flags=%08X,param3=%.02f,size=%08X,size2=%08X)", prequest->hdr.code, prequest->hdr.param1, prequest->hdr.param2, prequest->hdr.flags, prequest->hdr.param3, prequest->hdr.size, prequest->hdr.size2);
-	PLUGIN::debug(tmp);
+	DEBUGWRITE(tmp);
 
 	// check authentication
 	if (prequest->hdr.code == NGWINAMP_REQ_AUTH) {

@@ -203,7 +203,7 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 
 	char tmp[512];
 	sprintf(tmp, "NGWINAMPUSER::main() process (code=%u,param1=%08X,param2=%08X,flags=%08X,param3=%.02f,size=%08X,size2=%08X)", prequest->hdr.code, prequest->hdr.param1, prequest->hdr.param2, prequest->hdr.flags, prequest->hdr.param3, prequest->hdr.size, prequest->hdr.size2);
-	PLUGIN::debug(tmp);
+	DEBUGWRITE(tmp);
 
 	if (this->canread()) {
 		switch (prequest->hdr.code) {
@@ -505,7 +505,7 @@ dword NGWINAMPUSER::authenticate(const string &password, const SOCKADDR_IN &addr
 	char tmp[512];
 	sprintf(tmp, "NGWINAMPUSER::authenticate() login (username=%s,password=%s,ip=%u.%u.%u.%u)", this->username.c_str(), password.c_str(),
 		address.sin_addr.S_un.S_un_b.s_b1, address.sin_addr.S_un.S_un_b.s_b2, address.sin_addr.S_un.S_un_b.s_b3, address.sin_addr.S_un.S_un_b.s_b4);
-	PLUGIN::debug(tmp);
+	DEBUGWRITE(tmp);
 
 	if (this->connections.size() >= this->maxcon) {
 		return NGWINAMP_AUTH_TOOMANYCON;

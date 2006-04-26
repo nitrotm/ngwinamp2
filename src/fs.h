@@ -19,13 +19,21 @@ protected:
 	string			path;
 
 	vector<FSNode>	children;
+	vector<string>	exts;
 
 
 public:
 	FSNode() : type(FS_TYPE_NONE), size(0) {
 	}
-	FSNode(const string &path) : type(0), size(0), path(path) {
-		this->refresh();
+	FSNode(const string &path, const vector<string> &exts) : type(0), size(0), path(path) {
+		this->refresh(exts);
+	}
+	FSNode(const string &path, const vector<string> &exts, bool root) : type(0), size(0), path(path) {
+		if (root) {
+			this->type |= FS_TYPE_ROOT;
+			this->exts = exts;
+		}
+		this->refresh(exts);
 	}
 	FSNode(const FSNode &src) : type(src.type), size(src.size), name(src.name), path(src.path), children(src.children) {
 	}
@@ -90,29 +98,39 @@ public:
 	}
 
 
-	void refresh(void) {
+	FSNode find(const string &path) const {
+		// split next "/"
+		return FSNode();
+	}
+
+
+	bool refresh(void) {
+		if (this->isroot()) {
+			return this->refresh(this->exts);
+		}
+		return false;
+	}
+	bool refresh(const vector<string> &exts) {
 		if (pathisurl(this->path)) {
 			this->type |= FS_TYPE_REMOTE | FS_TYPE_FILE;
 			this->type &= ~(FS_TYPE_LOCAL | FS_TYPE_DIRECTORY);
+			DEBUGWRITE(("FSNode::refresh() : url[" + this->path + "]").c_str());
 		} else if (pathisdirectory(this->path)) {
+			vector<string> items = getdirectoryitems(this->path.c_str(), exts);
+			vector<dword>  remove;
+
 			this->type |= FS_TYPE_LOCAL | FS_TYPE_DIRECTORY;
 			this->type &= ~(FS_TYPE_REMOTE | FS_TYPE_FILE);
-		} else if (pathisfile(this->path)) {
-			this->type |= FS_TYPE_LOCAL | FS_TYPE_FILE;
-			this->type &= ~(FS_TYPE_REMOTE | FS_TYPE_DIRECTORY);
-		} else {
-			this->type &= ~(FS_TYPE_LOCAL | FS_TYPE_REMOTE | FS_TYPE_DIRECTORY | FS_TYPE_FILE);
-		}
-		if (this->islocal() && this->isdirectory()) {
-			vector<string> items = getdirectoryitems(this->path.c_str());
-			vector<dword>  remove;
+			DEBUGWRITE(("FSNode::refresh() : dir[" + this->path + "]").c_str());
 
 			for (dword i = 0; i < this->children.size(); i++) {
 				bool r = true;
 
 				for (dword j = 0; j < items.size(); j++) {
 					if (this->children[i].path.compare(items[j]) == 0) {
-						r = false;
+						if (this->children[i].isroot() || this->children[i].refresh(this->isroot() ? this->exts : exts)) {
+							r = false;
+						}
 						break;
 					}
 				}
@@ -135,10 +153,19 @@ public:
 					}
 				}
 				if (!exists) {
-					this->children.push_back(FSNode(items[i]));
+					this->children.push_back(FSNode(items[i], exts));
 				}
 			}
+		} else if (pathisfile(this->path)) {
+			this->type |= FS_TYPE_LOCAL | FS_TYPE_FILE;
+			this->type &= ~(FS_TYPE_REMOTE | FS_TYPE_DIRECTORY);
+			DEBUGWRITE(("FSNode::refresh() : file[" + this->path + "]").c_str());
+		} else {
+			this->type &= ~(FS_TYPE_LOCAL | FS_TYPE_REMOTE | FS_TYPE_DIRECTORY | FS_TYPE_FILE);
+			DEBUGWRITE(("FSNode::refresh() : none[" + this->path + "]").c_str());
+			return false;
 		}
+		return true;
 	}
 };
 

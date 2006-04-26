@@ -10,12 +10,12 @@ NGWINAMPCON::NGWINAMPCON(SOCKET s, const SOCKADDR_IN &address, double timeout) :
 	memset(&this->snapshot, 0, sizeof(NETSERVERSNAPSHOT));
 	this->snapshot.mflags = NGWINAMP_SNAPSHOT_ALL;
 	this->timer.start();
-	PLUGIN::debug("NGWINAMPCON::NGWINAMPCON() new connection...");
+	DEBUGWRITE("NGWINAMPCON::NGWINAMPCON() new connection...");
 }
 
 NGWINAMPCON::~NGWINAMPCON() {
 	this->close();
-	PLUGIN::debug("NGWINAMPCON::~NGWINAMPCON() connection destroyed...");
+	DEBUGWRITE("NGWINAMPCON::~NGWINAMPCON() connection destroyed...");
 }
 
 
@@ -180,7 +180,7 @@ bool NGWINAMPCON::answer(NETDATA *panswer) {
 
 		char tmp[512];
 		sprintf(tmp, "NGWINAMPCON::enqueue() answer (code=%u,param1=%08X,param2=%08X,flags=%08X,param3=%.02f,size=%08X,size2=%08X)", panswer->hdr.code, panswer->hdr.param1, panswer->hdr.param2, panswer->hdr.flags, panswer->hdr.param3, panswer->hdr.size, panswer->hdr.size2);
-		PLUGIN::debug(tmp);
+		DEBUGWRITE(tmp);
 
 		this->answers.push_back(panswer);
 		return true;

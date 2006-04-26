@@ -79,7 +79,27 @@ vector<string> strsplit(const string &value, const string &separator, dword limi
 	return items;
 }
 
-vector<string> getdirectoryitems(const string &filename) {
+bool isvalidfile(const string &path, const string &filename, const vector<string> &exts, bool dir) {
+	if (strcmp(filename.c_str(), ".") != 0 && strcmp(filename.c_str(), "..") != 0) {
+		if (dir != true && exts.size() > 0) {
+			char buffer[MAX_PATH];
+			char *ext;
+
+			lstrcpyn(buffer, filename.c_str(), MAX_PATH);
+			ext = PathFindExtension(buffer);
+			for (dword i = 0; i < exts.size(); i++) {
+				if (exts[i].compare(ext) == 0) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+	return false;
+}
+
+vector<string> getdirectoryitems(const string &filename, const vector<string> &exts) {
 	WIN32_FIND_DATA	wfd;
 	vector<string>	items;
 	HANDLE			hFind;
@@ -88,31 +108,57 @@ vector<string> getdirectoryitems(const string &filename) {
 	if (filename[filename.length() - 1] != '\\') {
 		separator = "\\";
 	}
-	hFind = FindFirstFile((filename + separator).c_str(), &wfd);
+	hFind = FindFirstFile((filename + separator + "*").c_str(), &wfd);
 	if (hFind != INVALID_HANDLE_VALUE) {
-		items.push_back(filename + separator + wfd.cFileName);
-		while (FindNextFile(hFind, &wfd) != 0) {
+		if (isvalidfile(filename + separator, wfd.cFileName, exts, ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ? true : false)) {
 			items.push_back(filename + separator + wfd.cFileName);
+		}
+		while (FindNextFile(hFind, &wfd) != 0) {
+			if (isvalidfile(filename + separator, wfd.cFileName, exts, ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ? true : false)) {
+				items.push_back(filename + separator + wfd.cFileName);
+			}
 		}
 		FindClose(hFind);
 	}
+	sort(items.begin(), items.end());
 	return items;
 }
 
 bool pathisurl(const string &filename) {
-	return (filename.find("://") > 0);
+	if (filename.find("://") < filename.length()) {
+		return true;
+	}
+	return false;
 }
 
 bool pathisfile(const string &filename) {
-	if (PathFileExists(filename.c_str()) == TRUE && PathIsDirectory(filename.c_str()) == FALSE) {
+	if (PathFileExists(filename.c_str()) && !PathIsDirectory(filename.c_str())) {
 		return true;
 	}
 	return false;
 }
 
 bool pathisdirectory(const string &filename) {
-	if (PathFileExists(filename.c_str()) == TRUE && PathIsDirectory(filename.c_str()) == TRUE) {
+	if (PathFileExists(filename.c_str()) && PathIsDirectory(filename.c_str())) {
 		return true;
 	}
 	return false;
 }
+
+#ifdef _DEBUG
+
+void debugclear() {
+	CloseHandle(CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL));
+}
+
+void debugwrite(const char *text) {
+	HANDLE	hFile = CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
+	DWORD	bw;
+
+	SetFilePointer(hFile, 0, NULL, FILE_END);
+	WriteFile(hFile, text, strlen(text), &bw, NULL);
+	WriteFile(hFile, "\r\n", 2, &bw, NULL);
+	CloseHandle(hFile);
+}
+
+#endif

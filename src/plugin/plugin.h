@@ -20,21 +20,6 @@ class PLUGIN {
 public:
 	static NGWINAMPSERVER	*pwinamp;
 	static HINSTANCE		hInstance;
-
-
-	static void cleardebug() {
-		CloseHandle(CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL));
-	}
-
-	static void debug(const char *text) {
-		HANDLE	hFile = CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
-		DWORD	bw;
-
-		SetFilePointer(hFile, 0, NULL, FILE_END);
-		WriteFile(hFile, text, strlen(text), &bw, NULL);
-		WriteFile(hFile, "\r\n", 2, &bw, NULL);
-		CloseHandle(hFile);
-	}
 };
 
 
