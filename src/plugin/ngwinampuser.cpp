@@ -310,8 +310,47 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			return true;
 
 		case NGWINAMP_REQ_BWGETROOTS:
+			{
+				word  length = 1;
+
+				buffer.append(&length, 2);
+				buffer.append("/", 1);
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWROOTS, 1, 0, 0, 0.0, buffer))) {
+					return false;
+				}
+			}
 			return true;
 		case NGWINAMP_REQ_BWGETLIST:
+			{
+				vector<string>	dirs;
+				vector<string>	files;
+				string			path = prequest->buffer.tostring();
+
+				strreplace(path, '\\', '/');
+				if (path.length() > 0) {
+					const FSNode *pnode = this->pserver->findshare(path);
+
+					if (pnode != NULL) {
+						dirs = pnode->listdirectories(this->username);
+						files = pnode->listfiles(this->username);
+					}
+				}
+				for (dword i = 0; i < dirs.size(); i++) {
+					word   length = (word)dirs[i].length();
+
+					buffer.append(&length, 2);
+					buffer.append(dirs[i].c_str(), length);
+				}
+				for (dword i = 0; i < files.size(); i++) {
+					word   length = (word)files[i].length();
+
+					buffer.append(&length, 2);
+					buffer.append(files[i].c_str(), length);
+				}
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWLIST, dirs.size(), files.size(), 0, 0.0, buffer))) {
+					return false;
+				}
+			}
 			return true;
 
 		case NGWINAMP_REQ_GETSNAPSHOT:
@@ -370,131 +409,200 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 	if (this->canwrite()) {
 		switch (prequest->hdr.code) {
 		case NGWINAMP_REQ_PREV:
-			this->pserver->prev();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_BACK)) {
+				this->pserver->prev();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLAY:
-			this->pserver->play();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_PLAY)) {
+				this->pserver->play();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PAUSE:
-			this->pserver->pause();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_PAUSE)) {
+				this->pserver->pause();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_STOP:
-			this->pserver->stop();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_STOP)) {
+				this->pserver->stop();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_NEXT:
-			this->pserver->next();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_NEXT)) {
+				this->pserver->next();
+				return true;
+			}
+			break;
 
 		case NGWINAMP_REQ_SETVOLUME:
-			this->pserver->sn_setvolume(prequest->hdr.param3);
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_VOLUME)) {
+				this->pserver->sn_setvolume(prequest->hdr.param3);
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_SETPAN:
-			this->pserver->sn_setpan(prequest->hdr.param3);
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_PAN)) {
+				this->pserver->sn_setpan(prequest->hdr.param3);
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_SETPOS:
-			this->pserver->sn_setpos(prequest->hdr.param3);
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_POS)) {
+				this->pserver->sn_setpos(prequest->hdr.param3);
+				return true;
+			}
+			break;
 
 		case NGWINAMP_REQ_PLADDFILES:
-			{
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_ADD)) {
 				dword offset = 0;
 
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
-					string filename;
-					dword  index;
-					word   length;
+					vector<string>	paths;
+					string			filename;
+					dword			index;
+					word			length;
 
-					if (prequest->buffer.read(&index, offset + 0, 4) == 4 &&
-						prequest->buffer.read(&length, offset + 4, 2) == 2) {
-						filename = prequest->buffer.tostring(offset + 6, length);
-						this->pserver->pl_addfile(filename);
+					if (prequest->buffer.read(&index, offset + 0, 4) != 4 ||
+						prequest->buffer.read(&length, offset + 4, 2) != 2) {
+						return false;
+					}
+					filename = prequest->buffer.tostring(offset + 6, length);
+					if (filename.length() != length) {
+						return false;
 					}
 					offset += 6 + length;
+
+					paths = this->pserver->getfilepaths(this->username, filename);
+					this->pserver->pl_addfile(paths);
 				}
+				return true;
 			}
-			return true;
+			break;
 		case NGWINAMP_REQ_PLSETPOS:
-			this->pserver->pl_setpos(prequest->hdr.param1);
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
+				this->pserver->pl_setpos(prequest->hdr.param1);
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLSETSHUFFLE:
-			this->pserver->pl_setshuffle((prequest->hdr.param1 != NGWINAMP_NONE) ? true : false);
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
+				this->pserver->pl_setshuffle((prequest->hdr.param1 != NGWINAMP_NONE) ? true : false);
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLSETREPEAT:
-			this->pserver->pl_setrepeat((prequest->hdr.param1 != NGWINAMP_NONE) ? true : false);
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
+				this->pserver->pl_setrepeat((prequest->hdr.param1 != NGWINAMP_NONE) ? true : false);
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLCLEAR:
-			this->pserver->pl_clear();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_DEL)) {
+				this->pserver->pl_clear();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLSETFILES:
-			{
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_SET)) {
 				dword offset = 0;
 
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
-					string filename;
-					dword  index;
-					word   length;
+					vector<string>	paths;
+					string			filename;
+					dword			index;
+					word			length;
 
-					if (prequest->buffer.read(&index, offset + 0, 4) == 4 &&
-						prequest->buffer.read(&length, offset + 4, 2) == 2) {
-						filename = prequest->buffer.tostring(offset + 6, length);
-						this->pserver->pl_setfile(index, filename);
+					if (prequest->buffer.read(&index, offset + 0, 4) != 4 ||
+						prequest->buffer.read(&length, offset + 4, 2) != 2) {
+						return false;
+					}
+					filename = prequest->buffer.tostring(offset + 6, length);
+					if (filename.length() != length) {
+						return false;
 					}
 					offset += 6 + length;
+
+					paths = this->pserver->getfilepaths(this->username, filename);
+					this->pserver->pl_setfile(index, paths);
 				}
+				return true;
 			}
-			return true;
+			break;
 		case NGWINAMP_REQ_PLDELFILES:
-			{
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_DEL)) {
 				vector<dword>	items;
 				dword			offset = 0;
 
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
 					dword index;
 
-					if (prequest->buffer.read(&index, offset + 0, 4) == 4) {
-						items.push_back(index);
+					if (prequest->buffer.read(&index, offset + 0, 4) != 4) {
+						return false;
 					}
 					offset += 4;
+					items.push_back(index);
 				}
-				sort(items.end(), items.begin());
-				for (dword i = 0; i < items.size(); i++) {
-					this->pserver->pl_delfile(items[i]);
-				}
+				sort(items.begin(), items.end());
+				reverse(items.begin(), items.end());
+				this->pserver->pl_delfile(items);
+				return true;
 			}
-			return true;
+			break;
 		case NGWINAMP_REQ_PLMOVEFILES:
-			{
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_SET)) {
 				dword offset = 0;
 
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
 					dword  index1, index2;
 
-					if (prequest->buffer.read(&index1, offset + 0, 4) == 4 &&
-						prequest->buffer.read(&index2, offset + 4, 2) == 4) {
-						this->pserver->pl_swapfile(index1, index2);
+					if (prequest->buffer.read(&index1, offset + 0, 4) != 4 ||
+						prequest->buffer.read(&index2, offset + 4, 2) != 4) {
+						return false;
 					}
 					offset += 8;
+					this->pserver->pl_swapfile(index1, index2);
 				}
+				return true;
 			}
-			return true;
+			break;
 		case NGWINAMP_REQ_PLRANDOMIZE:
-			this->pserver->pl_randomize();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
+				this->pserver->pl_randomize();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLSORTBYNAME:
-			this->pserver->pl_sortbyname();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
+				this->pserver->pl_sortbyname();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLSORTBYPATH:
-			this->pserver->pl_sortbypath();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
+				this->pserver->pl_sortbypath();
+				return true;
+			}
+			break;
 		case NGWINAMP_REQ_PLDELDEADFILES:
-			this->pserver->pl_removedeadfiles();
-			return true;
+			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
+				this->pserver->pl_removedeadfiles();
+				return true;
+			}
+			break;
 		}
 	}
 	if (this->canadmin()) {
 //		switch (prequest->hdr.code) {
 //		}
+		return true;
 	}
+	DEBUGWRITE("Error processing request for " + this->username + " !");
 	return false;
 }
 

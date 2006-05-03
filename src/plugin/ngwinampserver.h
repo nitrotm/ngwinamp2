@@ -23,6 +23,7 @@ protected:
 	dword					cfg_connection;
 	dword					cfg_timeout;
 	dword					cfg_buffersize;
+	bool					cfg_allowzzip;
 
 	// server states
 	SOCKET					swait;
@@ -32,7 +33,8 @@ protected:
 	vector<NGWINAMPUSER*>	users;
 
 	// sharing
-	FSNode					shares;
+	NGTIMER					sharetimer;
+	FSRoot					shares;
 
 	// global states
 	HANDLE					hthread;
@@ -41,6 +43,7 @@ protected:
 
 
 	void readcfg(const string &filename);
+	void appendshare(FSRoot *parent, const CFGNode &share);
 	void savecfg(const string &filename);
 
 	bool init(void);
@@ -50,7 +53,7 @@ protected:
 	void accept(void);
 	void gc(void);
 
-	NGWINAMPUSER* find(const string &username);
+	NGWINAMPUSER* finduser(const string &username);
 
 	bool authenticate(NGWINAMPCON *pconnection, NETDATA *prequest);
 
@@ -64,6 +67,10 @@ public:
 
 	bool start();
 	bool stop();
+
+	const FSNode* findshare(const string &path);
+	vector<string> getfilepaths(const string &username, const string &path);
+	vector<string> getfilepaths(const string &username, const FSNode *pnode, const vector<string> childs);
 };
 
 

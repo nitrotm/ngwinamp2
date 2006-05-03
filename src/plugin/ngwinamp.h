@@ -68,10 +68,10 @@ public:
 	void   pl_setshuffle(bool shuffle);
 	bool   pl_getrepeat(void);
 	void   pl_setrepeat(bool repeat);
-	bool   pl_addfile(const string &filename);
-	bool   pl_insfile(dword index, const string &filename);
-	bool   pl_setfile(dword index, const string &filename);
-	bool   pl_delfile(dword index);
+	bool   pl_addfile(const vector<string> &filename);
+	bool   pl_insfile(dword index, const vector<string> &filename);
+	bool   pl_setfile(dword index, const vector<string> &filename);
+	bool   pl_delfile(const vector<dword> &index);
 	bool   pl_swapfile(dword index1, dword index2);
 	string pl_getfilename(dword index);
 	string pl_getname(dword index);

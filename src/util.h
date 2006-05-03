@@ -279,17 +279,23 @@ public:
 };
 
 
+string strreplace(const string &value, char src, char dst);
+string strreplace(const string &value, const string &src, const string &dst, dword level = 0);
 string strtrim(const string &value);
 string strstrip(const string &value, const string &separator);
-vector<string> strsplit(const string &value, const string &separator, dword limit);
+vector<string> strsplit(const string &value, const string &separator, dword limit, bool withseparator = true);
 vector<string> getdirectoryitems(const string &filename, const vector<string> &exts);
+bool pathexists(const string &filename);
+bool pathcompare(const string &src1, const string &src2);
 bool pathisurl(const string &filename);
 bool pathisfile(const string &filename);
 bool pathisdirectory(const string &filename);
+string pathappendslash(const string &filename);
 
 #ifdef _DEBUG
 void debugclear();
 void debugwrite(const char *text);
+void debugwrite(const string &text);
 
 #define DEBUGCLEAR			debugclear()
 #define DEBUGWRITE(text)	debugwrite(text)

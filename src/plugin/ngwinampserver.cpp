@@ -2,7 +2,7 @@
 #include "plugin.h"
 
 
-NGWINAMPSERVER::NGWINAMPSERVER(HWND hwndplugin) : NGWINAMP(hwndplugin), hthread(NULL), swait(INVALID_SOCKET) {
+NGWINAMPSERVER::NGWINAMPSERVER(HWND hwndplugin) : NGWINAMP(hwndplugin), hthread(NULL), swait(INVALID_SOCKET), shares(NULL, "", vector<string>()) {
 	this->hrunning = CreateEvent(NULL, TRUE, FALSE, NULL);
 	this->hquit = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
@@ -61,7 +61,7 @@ bool NGWINAMPSERVER::stop() {
 
 
 void NGWINAMPSERVER::readcfg(const string &filename) {
-	this->cfg.read("c:\\test.cfg");
+	this->cfg.read("c:\\ngwinamp.cfg");
 
 	CFGNode server = this->cfg.get("server");
 
@@ -75,6 +75,7 @@ void NGWINAMPSERVER::readcfg(const string &filename) {
 	this->cfg_connection = network.getchild("connection").getuint();
 	this->cfg_timeout = network.getchild("timeout").getuint();
 	this->cfg_buffersize = network.getchild("buffersize").getuint();
+	this->cfg_allowzzip = network.getchild("allowzzip").getbool();
 
 
 	CFGNode users = server.getchild("users");
@@ -95,21 +96,99 @@ void NGWINAMPSERVER::readcfg(const string &filename) {
 			}
 			puser->setpolicies(puser->parsepolicies(user.getchild("access")), user.getchild("connection").getuint(), user.getchild("timeout").getfloat());
 			this->users.push_back(puser);
-
-//			DEBUGWRITE(user.getname().c_str());
 		}
 	}
 
 
-	CFGNode shares = server.getchild("shares");
-	vector<string> exts;
+	CFGNode sharedefs = server.getchild("shares");
 
-	for (dword i = 0; i < shares.size(); i++) {
-//		DEBUGWRITE(shares.getchild(i).getname().c_str());
+	for (dword i = 0; i < sharedefs.size(); i++) {
+		this->appendshare(&this->shares, sharedefs.getchild(i));
 	}
-	exts.push_back(".zip");
-	exts.push_back(".txt");
-	this->shares.add(FSNode("C:\\Downloads", exts, true));
+}
+
+void NGWINAMPSERVER::appendshare(FSRoot *parent, const CFGNode &share) {
+	if (share.isgroup() && !parent->exists(share.getname())) {
+		vector<string>	usernames;
+		FSRoot			*proot;
+		FSNode			*pnode;
+
+		if (share.getchild("users").getstr().length() > 0) {
+			usernames = strsplit(share.getchild("users").getstr(), " ", 0, false);
+		}
+		if (share.exists("localpath") || share.exists("remotepath")) {
+			vector<string> exts;
+
+			if (share.getchild("filter").getstr().length() > 0) {
+				exts = strsplit(share.getchild("filter").getstr(), " ", 0, false);
+			}
+			if (share.exists("localpath")) {
+				if (pathexists(share.getchild("localpath").getstr())) {
+					proot = new FSRoot(parent, share.getname(), usernames, share.getchild("localpath").getstr(), exts, share.getchild("refresh").getfloat(), share.getchild("recursive").getbool());
+					parent->add(proot);
+
+					DEBUGWRITE("Local share " + share.getname() + " at " + proot->getfullname());
+
+					for (dword i = 0; i < share.size(); i++) {
+						this->appendshare(proot, share.getchild(i));
+					}
+				}
+			} else if (share.exists("remotepath")) {
+				NETRESOURCE nr;
+				DWORD		success;
+				char		path[MAX_PATH];
+
+				memset(&nr, 0, sizeof(NETRESOURCE));
+				nr.dwType = RESOURCETYPE_DISK;
+				lstrcpyn(path, share.getchild("remotepath").getstr().c_str(), MAX_PATH);
+				nr.lpRemoteName = path;
+				if (share.exists("remotelogin")) {
+					if (share.exists("remotepassword")) {
+						success = WNetAddConnection2(&nr, share.getchild("remotepassword").getstr().c_str(), share.getchild("remotelogin").getstr().c_str(), 0);
+					} else {
+						success = WNetAddConnection2(&nr, NULL, share.getchild("remotelogin").getstr().c_str(), 0);
+					}
+				} else {
+					if (share.exists("remotepassword")) {
+						success = WNetAddConnection2(&nr, share.getchild("remotepassword").getstr().c_str(), NULL, 0);
+					} else {
+						success = WNetAddConnection2(&nr, NULL, NULL, 0);
+					}
+				}
+				if (success == NO_ERROR) {
+					DEBUGWRITE("Logon successful to remote share " + share.getname() + " at " + share.getchild("remotepath").getstr());
+				} else {
+					DEBUGWRITE("Logon failed to remote share " + share.getname() + " at " + share.getchild("remotepath").getstr());
+				}
+				if (pathexists(share.getchild("remotepath").getstr())) {
+					proot = new FSRoot(parent, share.getname(), usernames, share.getchild("remotepath").getstr(), exts, share.getchild("refresh").getfloat(), share.getchild("recursive").getbool());
+					parent->add(proot);
+
+					DEBUGWRITE("Remote share " + share.getname() + " at " + proot->getfullname());
+
+					for (dword i = 0; i < share.size(); i++) {
+						this->appendshare(proot, share.getchild(i));
+					}
+				}
+			}
+		} else if (share.exists("url")) {
+			if (pathisurl(share.getchild("url").getstr())) {
+				pnode = new FSRoot(parent, share.getname(), usernames, share.getchild("url").getstr());
+				parent->add(pnode);
+
+				DEBUGWRITE("Internet share " + share.getname() + " at " + pnode->getfullname());
+			}
+		} else {
+			proot = new FSRoot(parent, share.getname(), usernames);
+			parent->add(proot);
+
+			DEBUGWRITE("Node " + share.getname() + " at " + proot->getfullname());
+
+			for (dword i = 0; i < share.size(); i++) {
+				this->appendshare(proot, share.getchild(i));
+			}
+		}
+	}
 }
 
 void NGWINAMPSERVER::savecfg(const string &filename) {
@@ -123,6 +202,8 @@ bool NGWINAMPSERVER::init(void) {
 	ResetEvent(this->hquit);
 	SetEvent(this->hrunning);
 	this->readcfg("c:\\test.cfg");
+	this->shares.refreshChilds(true);
+	this->sharetimer.start();
 
 	// create listening socket
 	SOCKADDR_IN	addr;
@@ -173,6 +254,7 @@ void NGWINAMPSERVER::free() {
 	}
 
 	// free data
+	this->shares.clear();
 	ResetEvent(this->hquit);
 	ResetEvent(this->hrunning);
 
@@ -209,6 +291,12 @@ void NGWINAMPSERVER::main(void) {
 
 	// remove closed connections
 	this->gc();
+
+	// refresh shares
+	if (this->sharetimer.pick() > 10.0) {
+		this->shares.refreshChilds(false);
+		this->sharetimer.start();
+	}
 }
 
 void NGWINAMPSERVER::accept(void) {
@@ -247,8 +335,67 @@ void NGWINAMPSERVER::gc(void) {
 	}
 }
 
+const FSNode* NGWINAMPSERVER::findshare(const string &path) {
+	NGLOCKER locker(this);
 
-NGWINAMPUSER* NGWINAMPSERVER::find(const string &username) {
+	return this->shares.find(path);
+}
+
+vector<string> NGWINAMPSERVER::getfilepaths(const string &username, const string &path) {
+	const FSNode *pnode = this->shares.find(path);
+
+	if (pnode != NULL) {
+		if (pnode->isfile()) {
+			vector<string> items;
+
+			items.push_back(pnode->getpath());
+			return items;
+		} else {
+			vector<string> items = this->getfilepaths(username, pnode, pnode->listdirectories(username));
+			vector<string> files = pnode->listfiles(username);
+
+			for (dword i = 0; i < files.size(); i++) {
+				const FSNode *pchild = pnode->get(files[i]);
+
+				if (pnode != NULL) {
+					items.push_back(pchild->getpath());
+				}
+			}
+			return items;
+		}
+	}
+	return vector<string>();
+}
+vector<string> NGWINAMPSERVER::getfilepaths(const string &username, const FSNode *pnode, const vector<string> childs) {
+	vector<string> items;
+
+	for (dword i = 0; i < childs.size(); i++) {
+		const FSNode *pchild = pnode->get(childs[i]);
+
+		if (pchild != NULL) {
+			vector<string> subitems = this->getfilepaths(username, pchild, pchild->listdirectories(username));
+			vector<string> files = pchild->listfiles(username);
+
+			for (dword i = 0; i < subitems.size(); i++) {
+				items.push_back(subitems[i]);
+			}
+			for (dword i = 0; i < files.size(); i++) {
+				const FSNode *psubchild = pchild->get(files[i]);
+
+				if (psubchild != NULL) {
+					items.push_back(psubchild->getpath());
+				}
+			}
+		}
+	}
+	return items;
+}
+
+
+
+NGWINAMPUSER* NGWINAMPSERVER::finduser(const string &username) {
+	NGLOCKER locker(this);
+
 	for (dword i = 0; i < this->users.size(); i++) {
 		if (this->users[i]->username.compare(username) == 0) {
 			return this->users[i];
@@ -259,6 +406,7 @@ NGWINAMPUSER* NGWINAMPSERVER::find(const string &username) {
 
 
 bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
+	NGLOCKER	 locker(this);
 	NGWINAMPUSER *puser;
 	string		 username, password;
 	dword		 code = NGWINAMP_AUTH_NOTDONE;
@@ -292,12 +440,12 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 		}
 	}
 	if (username.length() > 0) {
-		puser = this->find(username);
+		puser = this->finduser(username);
 		if (puser != NULL) {
 			code = puser->authenticate(password, pconnection->address);
 			if (code == NGWINAMP_AUTH_SUCCESS) {
 				// setup connection options
-				if ((prequest->hdr.flags & NGWINAMP_FILTER_ALLOWZZIP) != 0) {
+				if (this->cfg_allowzzip && (prequest->hdr.flags & NGWINAMP_FILTER_ALLOWZZIP) != 0) {
 					pconnection->setflags(NGWINAMP_FILTER_ALLOWZZIP);
 				}
 				pconnection->settimeout(puser->gettimeout());

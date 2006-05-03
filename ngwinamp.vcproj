@@ -147,6 +147,9 @@
 				RelativePath=".\src\config.h">
 			</File>
 			<File
+				RelativePath=".\src\fs.cpp">
+			</File>
+			<File
 				RelativePath=".\src\fs.h">
 			</File>
 			<File

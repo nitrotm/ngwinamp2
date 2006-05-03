@@ -7,59 +7,74 @@ class CFGNode {
 protected:
 	string	name;
 	string	value;
+	bool	group;
 
 	vector<CFGNode>	children;
 
 
 public:
-	CFGNode() {
+	CFGNode(bool group, const string &name) : group(group), name(name) {
 	}
-	CFGNode(const string &name, const string &value) : name(name), value(value) {
+	CFGNode(const string &name, const string &value) : group(false), name(name), value(value) {
 	}
-	CFGNode(const CFGNode &src) : name(src.name), value(src.value), children(src.children) {
+	CFGNode(const CFGNode &src) : group(src.group), name(src.name), value(src.value), children(src.children) {
 	}
 
 
-	string getname(void) {
+	bool isgroup(void) const {
+		return this->group;
+	}
+
+	const string& getname(void) const {
 		return this->name;
 	}
 
-	string getstr(void) {
+	const string& getstr(void) const {
 		return this->value;
 	}
-	bool getbool(void) {
+	bool getbool(void) const {
 		return (this->value.compare("true") == 0);
 	}
-	int getint(void) {
+	int getint(void) const {
 		return atoi(this->value.c_str());
 	}
-	dword getuint(void) {
+	dword getuint(void) const {
 		return (dword)atol(this->value.c_str());
 	}
-	double getfloat(void) {
+	double getfloat(void) const {
 		return atof(this->value.c_str());
 	}
 
 
-	dword size(void) {
+	dword size(void) const {
 		return this->children.size();
 	}
-	CFGNode getchild(const string &name) {
+	bool exists(const string &name) const {
+		for (dword i = 0; i < this->children.size(); i++) {
+			if (this->children[i].name.compare(name) == 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	CFGNode getchild(const string &name) const {
 		for (dword i = 0; i < this->children.size(); i++) {
 			if (this->children[i].name.compare(name) == 0) {
 				return this->children[i];
 			}
 		}
-		return CFGNode();
+		return CFGNode(false, "");
 	}
-	CFGNode getchild(dword i) {
+	CFGNode getchild(dword i) const {
 		if (i < this->children.size()) {
 			return this->children[i];
 		}
-		return CFGNode();
+		return CFGNode(false, "");
 	}
 	void addchild(const CFGNode &node) {
-		this->children.push_back(node);
+		if (this->group) {
+			this->children.push_back(node);
+		}
 	}
 	void delchild(dword i) {
 		if (i < this->children.size()) {
@@ -78,7 +93,7 @@ protected:
 
 
 	dword parsegroup(CFGNode &node, const string &name, const vector<string> &tokens, dword index) {
-		CFGNode cur(name, "");
+		CFGNode cur(true, name);
 		dword   ret = tokens.size();
 
 		for (dword i = index; i < ret; i++) {
@@ -112,7 +127,7 @@ protected:
 
 
 public:
-	CFG() {
+	CFG() : root(true, "") {
 	}
 
 

@@ -2,6 +2,48 @@
 #include "global.h"
 
 
+string strreplace(const string &value, char src, char dst) {
+	string ret(value);
+
+	for (dword i = 0; i < ret.length(); i++) {
+		if (ret[i] == src) {
+			ret[i] = dst;
+		}
+	}
+	return ret;
+}
+string strreplace(const string &value, const string &src, const string &dst, dword level) {
+	string	ret;
+	dword	count = 0;
+
+	if (src.length() == 0) {
+		return value;
+	}
+	for (dword i = 0; i < value.length(); i++) {
+		if (value[i] == src[0]) {
+			bool found = true;
+
+			for (dword j = 1; (i + j) < value.length() && j < src.length(); j++) {
+				if (value[i + j] != src[j]) {
+					found = false;
+					break;
+				}
+			}
+			if (found) {
+				ret += dst;
+				i += src.length() - 1;
+				count++;
+				continue;
+			}
+		}
+		ret += value[i];
+	}
+	if (count > 0 && level < 64) {
+		return strreplace(ret, src, dst, level + 1);
+	}
+	return ret;
+}
+
 string strtrim(const string &value) {
 	dword i1 = 0, i2 = value.length();
 
@@ -47,7 +89,7 @@ string strstrip(const string &value, const string &separator) {
 	return result;
 }
 
-vector<string> strsplit(const string &value, const string &separator, dword limit) {
+vector<string> strsplit(const string &value, const string &separator, dword limit, bool withseparator) {
 	vector<string>	items;
 	dword			last = 0;
 	long			i;
@@ -73,7 +115,9 @@ vector<string> strsplit(const string &value, const string &separator, dword limi
 		if ((i - last) > 0) {
 			items.push_back(value.substr(last, i - last));
 		}
-		items.push_back(string(s));
+		if (withseparator) {
+			items.push_back(string(s));
+		}
 		last = i + 1;
 	}
 	return items;
@@ -103,25 +147,33 @@ vector<string> getdirectoryitems(const string &filename, const vector<string> &e
 	WIN32_FIND_DATA	wfd;
 	vector<string>	items;
 	HANDLE			hFind;
-	string			separator;
+	string			path = pathappendslash(filename);
 
-	if (filename[filename.length() - 1] != '\\') {
-		separator = "\\";
-	}
-	hFind = FindFirstFile((filename + separator + "*").c_str(), &wfd);
+	hFind = FindFirstFile((path + "*").c_str(), &wfd);
 	if (hFind != INVALID_HANDLE_VALUE) {
-		if (isvalidfile(filename + separator, wfd.cFileName, exts, ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ? true : false)) {
-			items.push_back(filename + separator + wfd.cFileName);
+		if (isvalidfile(path, wfd.cFileName, exts, ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ? true : false)) {
+			items.push_back(wfd.cFileName);
 		}
 		while (FindNextFile(hFind, &wfd) != 0) {
-			if (isvalidfile(filename + separator, wfd.cFileName, exts, ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ? true : false)) {
-				items.push_back(filename + separator + wfd.cFileName);
+			if (isvalidfile(path, wfd.cFileName, exts, ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) ? true : false)) {
+				items.push_back(wfd.cFileName);
 			}
 		}
 		FindClose(hFind);
 	}
 	sort(items.begin(), items.end());
 	return items;
+}
+
+bool pathexists(const string &filename) {
+	if (PathFileExists(filename.c_str())) {
+		return true;
+	}
+	return false;
+}
+
+bool pathcompare(const string &src1, const string &src2) {
+	return (strcmpi(src1.c_str(), src2.c_str()) == 0);
 }
 
 bool pathisurl(const string &filename) {
@@ -145,6 +197,13 @@ bool pathisdirectory(const string &filename) {
 	return false;
 }
 
+string pathappendslash(const string &filename) {
+	if (filename[filename.length() - 1] != '\\') {
+		return (filename + "\\");
+	}
+	return filename;
+}
+
 #ifdef _DEBUG
 
 void debugclear() {
@@ -159,6 +218,10 @@ void debugwrite(const char *text) {
 	WriteFile(hFile, text, strlen(text), &bw, NULL);
 	WriteFile(hFile, "\r\n", 2, &bw, NULL);
 	CloseHandle(hFile);
+}
+
+void debugwrite(const string &text) {
+	debugwrite(text.c_str());
 }
 
 #endif

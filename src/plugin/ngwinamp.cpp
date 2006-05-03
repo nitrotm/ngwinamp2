@@ -196,9 +196,12 @@ void NGWINAMP::pl_setlength(dword length) {
 
 	if (length > 0) {
 		if (length < this->pl_getlength()) {
+			vector<dword> indexes;
+
 			for (dword i = this->pl_getlength() - 1; i > length; i--) {
-				this->pl_delfile(i);
+				indexes.push_back(i);
 			}
+			this->pl_delfile(indexes);
 		}
 	} else {
 		this->pl_clear();
@@ -248,82 +251,63 @@ void NGWINAMP::pl_setrepeat(bool repeat) {
 		SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)0, (LPARAM)IPC_SET_REPEAT);
 	}
 }
-bool NGWINAMP::pl_addfile(const string &filename) {
+bool NGWINAMP::pl_addfile(const vector<string> &filenames) {
 	NGLOCKER lock(this);
 
-	// local directory ?
-/*	if (this->isdirectory(filename)) {
-		vector<string> items = this->getdirectoryitems(filename);
-
-		for (dword i = 0; i < items.size(); i++) {
-			this->pl_addfile(items[i]);
-		}
-		return true;
-	}*/
-
-	// remote or local file ?
-	if (pathisurl(filename) || pathisfile(filename)) {
+	for (dword i = 0; i < filenames.size(); i++) {
 		COPYDATASTRUCT	cds;
 
+		DEBUGWRITE("Try to add <" + filenames[i] + ">");
 		memset(&cds, 0, sizeof(COPYDATASTRUCT));
 		cds.dwData = IPC_PLAYFILE;
-		cds.lpData = (void*)filename.c_str();
-		cds.cbData = filename.length() + 1;
+		cds.lpData = (void*)filenames[i].c_str();
+		cds.cbData = filenames[i].length() + 1;
 		SendMessage(this->hplugin, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds);
-		return true;
 	}
-	return false;
+	return true;
 }
-bool NGWINAMP::pl_insfile(dword index, const string &filename) {
+bool NGWINAMP::pl_insfile(dword index, const vector<string> &filenames) {
 	NGLOCKER lock(this);
-
-	// local directory ?
-/*	if (pathisdirectory(filename)) {
-		vector<string> items = getdirectoryitems(filename);
-
-		for (dword i = 0; i < items.size(); i++) {
-			this->pl_insfile(index, items[i]);
-		}
-		return true;
-	}
-*/
 
 	// remote or local file ?
-	if (index >= 0 && index <= this->pl_getlength() && (pathisurl(filename) || pathisfile(filename))) {
-		COPYDATASTRUCT	cds; 
-		PE_FILEINFO		fi;
+	if (index >= 0 && index <= this->pl_getlength()) {
+		for (dword i = 0; i < filenames.size(); i++) {
+			COPYDATASTRUCT	cds; 
+			PE_FILEINFO		fi;
 
-		memset(&fi, 0, sizeof(PE_FILEINFO));
-		strcpy(fi.file, filename.c_str());
-		fi.index = (int)index;
+			memset(&fi, 0, sizeof(PE_FILEINFO));
+			strcpy(fi.file, filenames[i].c_str());
+			fi.index = (int)index + i;
 
-		memset(&cds, 0, sizeof(COPYDATASTRUCT));
-		cds.dwData = IPC_PE_INSERTFILENAME; 
-		cds.lpData = (void *)&fi; 
-		cds.cbData = sizeof(PE_FILEINFO); 
-		SendMessage(this->hplaylist, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds); 
+			memset(&cds, 0, sizeof(COPYDATASTRUCT));
+			cds.dwData = IPC_PE_INSERTFILENAME; 
+			cds.lpData = (void *)&fi; 
+			cds.cbData = sizeof(PE_FILEINFO); 
+			SendMessage(this->hplaylist, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds); 
+		}
 		return true;
 	}
 	return false;
 }
-bool NGWINAMP::pl_setfile(dword index, const string &filename) {
+bool NGWINAMP::pl_setfile(dword index, const vector<string> &filenames) {
+	NGLOCKER		lock(this);
+	vector<dword>	indexes;
+
+	indexes.push_back(index);
+	if (this->pl_delfile(indexes) && this->pl_insfile(index, filenames)) {
+		return true;
+	}
+	return false;
+}
+bool NGWINAMP::pl_delfile(const vector<dword> &indexes) {
 	NGLOCKER lock(this);
 
-	if (pathisurl(filename) || pathisfile(filename)) {
-		if (this->pl_delfile(index) && this->pl_insfile(index, filename)) {
-			return true;
+	for (dword i = 0; i < indexes.size(); i++) {
+		if (indexes[i] >= 0 && indexes[i] < this->pl_getlength()) {
+			SendMessage(this->hplaylist, WM_WA_IPC, (WPARAM)IPC_PE_DELETEINDEX, (LPARAM)indexes[i]); 
 		}
 	}
-	return false;
-}
-bool NGWINAMP::pl_delfile(dword index) {
-	NGLOCKER lock(this);
-
-	if (index >= 0 && index < this->pl_getlength()) {
-		SendMessage(this->hplaylist, WM_WA_IPC, (WPARAM)IPC_PE_DELETEINDEX, (LPARAM)index); 
-		return true;
-	}
-	return false;
+	return true;
 }
 bool NGWINAMP::pl_swapfile(dword index1, dword index2) {
 	NGLOCKER lock(this);

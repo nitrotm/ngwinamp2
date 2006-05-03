@@ -11,10 +11,13 @@ BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
 
 	switch (reason) {
 	case DLL_PROCESS_ATTACH:
+		DEBUGCLEAR;
+		DEBUGWRITE("DLL attached to winamp");
 		WSAStartup(MAKEWORD(2, 0), &wd);
 		break;
 
 	case DLL_PROCESS_DETACH:
+		DEBUGWRITE("DLL detached from winamp");
 		WSACleanup();
 		break;
 	}
@@ -31,7 +34,6 @@ WINAMP_GENDATA	winamp = {GPPHDR_VER, name, init, config, quit, NULL, NULL};
 
 
 int init() {
-	DEBUGCLEAR;
 	PLUGIN::hInstance = winamp.hDllInstance;
 	if (PLUGIN::pwinamp == NULL) {
 		PLUGIN::pwinamp = new NGWINAMPSERVER(winamp.hwndParent);
@@ -58,7 +60,6 @@ void config() {
 
 extern "C" {
 	__declspec(dllexport) HWINAMP_GENDATA winampGetGeneralPurposePlugin() {
-		DEBUGWRITE("ngwinamp winampGetGeneralPurposePlugin()...");
 		return &winamp;
 	}
 }
