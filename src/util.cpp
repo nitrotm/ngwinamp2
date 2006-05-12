@@ -211,10 +211,15 @@ void debugclear() {
 }
 
 void debugwrite(const char *text) {
-	HANDLE	hFile = CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
-	DWORD	bw;
+	SYSTEMTIME	st;
+	HANDLE		hFile = CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
+	DWORD		bw;
+	char		cd[256];
 
+	GetLocalTime(&st);
+	sprintf(cd, "[%04u/%02u/%02u %02u:%02u:%02u] ", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 	SetFilePointer(hFile, 0, NULL, FILE_END);
+	WriteFile(hFile, cd, strlen(cd), &bw, NULL);
 	WriteFile(hFile, text, strlen(text), &bw, NULL);
 	WriteFile(hFile, "\r\n", 2, &bw, NULL);
 	CloseHandle(hFile);

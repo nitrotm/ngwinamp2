@@ -17,7 +17,7 @@ protected:
 	bool				eof;
 
 	// winamp state
-	NETSERVERSNAPSHOT	snapshot;
+	NETSNAPSHOT			snapshot;
 
 	// requests
 	vector<NETDATA*>	requests;

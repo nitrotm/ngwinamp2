@@ -7,7 +7,6 @@
 #include "zzip/zziplib.h"
 
 
-
 /**
   * Timer object
   *
@@ -279,19 +278,24 @@ public:
 };
 
 
+// String utilities
 string strreplace(const string &value, char src, char dst);
 string strreplace(const string &value, const string &src, const string &dst, dword level = 0);
 string strtrim(const string &value);
 string strstrip(const string &value, const string &separator);
 vector<string> strsplit(const string &value, const string &separator, dword limit, bool withseparator = true);
+
+// Path utilities
 vector<string> getdirectoryitems(const string &filename, const vector<string> &exts);
+string pathappendslash(const string &filename);
 bool pathexists(const string &filename);
 bool pathcompare(const string &src1, const string &src2);
 bool pathisurl(const string &filename);
 bool pathisfile(const string &filename);
 bool pathisdirectory(const string &filename);
-string pathappendslash(const string &filename);
 
+
+// Debug utilities
 #ifdef _DEBUG
 void debugclear();
 void debugwrite(const char *text);

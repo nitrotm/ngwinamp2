@@ -165,6 +165,12 @@
 				RelativePath=".\src\net.h">
 			</File>
 			<File
+				RelativePath=".\src\netaddr.h">
+			</File>
+			<File
+				RelativePath=".\src\netdata.h">
+			</File>
+			<File
 				RelativePath=".\src\util.cpp">
 			</File>
 			<File

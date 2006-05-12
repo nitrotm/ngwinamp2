@@ -1,5 +1,6 @@
 // fs.cpp
 #include "global.h"
+#include "fs.h"
 
 
 FSNode::FSNode(FSNode *parent, const string &name) : parent(parent), type(FS_TYPE_NONE), size(0), name(strtrim(name)) {
@@ -162,32 +163,53 @@ const FSNode* FSNode::find(const string &path) const {
 	return NULL;
 }
 
-void FSNode::refreshChilds(bool force) {
-	DEBUGWRITE("FSNode::refreshChilds() !!");
-}
-
-bool FSNode::allowrefresh(bool force) {
-	DEBUGWRITE("FSNode::allowrefresh() !!");
+bool FSNode::lookup(void) {
+	if (pathisurl(this->path)) {
+		this->type |= FS_TYPE_REMOTE | FS_TYPE_FILE;
+		this->type &= ~(FS_TYPE_LOCAL | FS_TYPE_DIRECTORY);
+		this->clear();
+		DEBUGWRITE("FSNode::lookup() : url=" + this->getfullname());
+	} else if (pathisdirectory(this->path)) {
+		this->path = pathappendslash(this->path);
+		this->type |= FS_TYPE_LOCAL | FS_TYPE_DIRECTORY;
+		this->type &= ~(FS_TYPE_REMOTE | FS_TYPE_FILE);
+		DEBUGWRITE("FSNode::lookup() : dir=" + this->getfullname());
+	} else if (pathisfile(this->path)) {
+		this->type |= FS_TYPE_LOCAL | FS_TYPE_FILE;
+		this->type &= ~(FS_TYPE_REMOTE | FS_TYPE_DIRECTORY);
+		this->clear();
+		DEBUGWRITE("FSNode::lookup() : file=" + this->getfullname());
+	} else if (this->isroot()) {
+		this->type &= ~(FS_TYPE_LOCAL | FS_TYPE_REMOTE | FS_TYPE_DIRECTORY | FS_TYPE_FILE);
+		DEBUGWRITE("FSNode::lookup() : root=" + this->getfullname());
+	} else {
+		this->type &= ~(FS_TYPE_LOCAL | FS_TYPE_REMOTE | FS_TYPE_DIRECTORY | FS_TYPE_FILE);
+		this->clear();
+		DEBUGWRITE("FSNode::lookup() : none=" + this->getfullname());
+		return false;
+	}
 	return true;
 }
-b
 
 
 
-FSRoot::FSRoot(FSNode *parent, const string &name, const vector<string> &users) : FSNode(parent, name), users(users), refresh(0.0), recursive(true) {
+FSRoot::FSRoot(FSNode *parent, const string &name, const vector<string> &users) : FSNode(parent, name), users(users), timeout(0.0), recursive(true) {
 	if (parent != NULL) {
 		parent->mergeusers(users);
 	}
+	this->lookup();
 }
-FSRoot::FSRoot(FSNode *parent, const string &name, const vector<string> &users, const string &path) : FSNode(parent, name, path), users(users), refresh(-1), recursive(false) {
+FSRoot::FSRoot(FSNode *parent, const string &name, const vector<string> &users, const string &path) : FSNode(parent, name, path), users(users), timeout(-1), recursive(false) {
 	if (parent != NULL) {
 		parent->mergeusers(users);
 	}
+	this->lookup();
 }
-FSRoot::FSRoot(FSNode *parent, const string &name, const vector<string> &users, const string &path, const vector<string> &exts, double refresh, bool recursive) : FSNode(parent, name, path), users(users), exts(exts), refresh(refresh), recursive(recursive) {
+FSRoot::FSRoot(FSNode *parent, const string &name, const vector<string> &users, const string &path, const vector<string> &exts, double timeout, bool recursive) : FSNode(parent, name, path), users(users), exts(exts), timeout(timeout), recursive(recursive) {
 	if (parent != NULL) {
 		parent->mergeusers(users);
 	}
+	this->lookup();
 }
 FSRoot::~FSRoot() {
 }
@@ -239,117 +261,79 @@ void FSRoot::del(const string &name) {
 	}
 }
 
-bool FSRoot::refreshChild(bool force, FSRoot *root, FSNode *node) {
-	if (pathisurl(node->path)) {
-		node->type |= FS_TYPE_REMOTE | FS_TYPE_FILE;
-		node->type &= ~(FS_TYPE_LOCAL | FS_TYPE_DIRECTORY);
-		node->clear();
-		DEBUGWRITE("FSNode::refresh() : url=" + node->getfullname());
-	} else if (pathisdirectory(node->path)) {
-		vector<string>	items = getdirectoryitems(node->path, root->exts);
-		vector<dword>	remove;
+void FSRoot::refresh(bool force, FSNode *node) {
+	if (force || this->timeout == 0.0 || (this->timeout > 0.0 && this->timer.pick() > this->timeout)) {
+		if (pathisdirectory(node->path)) {
+			vector<string>	items = getdirectoryitems(node->path, this->exts);
+			vector<dword>	remove;
 
-		node->path = pathappendslash(node->path);
-		node->type |= FS_TYPE_LOCAL | FS_TYPE_DIRECTORY;
-		node->type &= ~(FS_TYPE_REMOTE | FS_TYPE_FILE);
-		DEBUGWRITE("FSNode::refresh() : dir=" + node->getfullname());
+			for (dword i = 0; i < node->children.size(); i++) {
+				if (node->children[i]->isroot()) {
+					node->children[i]->lookup();
+					((FSRoot*)node->children[i])->refresh(force, node->children[i]);
+				} else {
+					bool r = true;
 
-		for (dword i = 0; i < node->children.size(); i++) {
-			if (node->children[i]->isroot()) {
-				node->children[i]->refreshChilds(force);
-			} else {
-				bool r = true;
+					if (node->children[i]->lookup()) {
+						for (dword j = 0; j < items.size(); j++) {
+							if (pathcompare(node->children[i]->name, items[j])) {
+								r = false;
+								break;
+							}
+						}
+					}
+					if (r) {
+						remove.push_back(i);
+					} else {
+						this->refresh(force, node->children[i]);
+					}
+				}
+			}
+			if (remove.size() > 0) {
+				reverse(remove.begin(), remove.end());
+				for (dword i = 0; i < remove.size(); i++) {
+					delete node->children[remove[i]];
+					node->children.erase(node->children.begin() + remove[i]);
+				}
+			}
+			for (dword i = 0; i < items.size(); i++) {
+				bool exists = false;
 
-				for (dword j = 0; j < items.size(); j++) {
-					if (pathcompare(node->children[i]->name, items[j])) {
-						r = false;
+				for (dword j = 0; j < node->children.size(); j++) {
+					if (pathcompare(node->children[j]->name, items[i])) {
+						exists = true;
 						break;
 					}
 				}
-				if (r) {
-					remove.push_back(i);
-				}
-			}
-		}
-		if (remove.size() > 0) {
-			reverse(remove.begin(), remove.end());
-			for (dword i = 0; i < remove.size(); i++) {
-				delete node->children[remove[i]];
-				node->children.erase(node->children.begin() + remove[i]);
-			}
-		}
-		for (dword i = 0; i < items.size(); i++) {
-			bool exists = false;
+				if (!exists) {
+					string childpath(node->path + items[i]);
 
-			for (dword j = 0; j < node->children.size(); j++) {
-				if (pathcompare(node->children[j]->name, items[i])) {
-					exists = true;
-					break;
-				}
-			}
-			if (!exists) {
-				string childpath(node->path + items[i]);
+					if (this->recursive || pathisfile(childpath) || pathisurl(childpath)) {
+						FSNode *child = new FSNode(node, items[i], childpath);
 
-				if (root->recursive || pathisfile(childpath) || pathisurl(childpath)) {
-					FSNode *child = new FSNode(node, items[i], node->path + items[i]);
-
-					if (root->refreshChild(force, root, child)) {
-						node->children.push_back(child);
-					} else {
-						delete child;
+						if (child->lookup()) {
+							node->children.push_back(child);
+						} else {
+							delete child;
+						}
 					}
 				}
 			}
-		}
-	} else if (pathisfile(node->path)) {
-		node->type |= FS_TYPE_LOCAL | FS_TYPE_FILE;
-		node->type &= ~(FS_TYPE_REMOTE | FS_TYPE_DIRECTORY);
-		node->clear();
-		DEBUGWRITE("FSNode::refresh() : file=" + node->getfullname());
-	} else if (node->isroot()) {
-		node->type &= ~(FS_TYPE_LOCAL | FS_TYPE_REMOTE | FS_TYPE_DIRECTORY | FS_TYPE_FILE);
-		node->refreshChilds(force);
-	} else {
-		node->type &= ~(FS_TYPE_LOCAL | FS_TYPE_REMOTE | FS_TYPE_DIRECTORY | FS_TYPE_FILE);
-		node->clear();
-		DEBUGWRITE("FSNode::refresh() : none=" + node->getfullname());
-		return false;
-	}
-	char cdbg[256];
-	sprintf(cdbg, ("->refresh[" + root->getfullname() + "] : %.02f/%.02f").c_str(), root->timer.pick(), root->refresh);
-	DEBUGWRITE(cdbg);
-	return true;
-}
-
-bool FSRoot::allowrefresh(bool force) {
-	if (force || this->refresh == 0.0 || (this->refresh > 0.0 && this->timer.pick() > this->refresh)) {
-		return true;
-	}
-	return false;
-}
-
-void FSRoot::refreshChilds(bool force) {
-	if (this->allowrefresh(force)) {
-		vector<dword> remove;
-
-		for (dword i = 0; i < this->children.size(); i++) {
-			if (this->children[i]->isroot()) {
-				if (!this->refreshChild(force, (FSRoot*)this->children[i], this->children[i])) {
-					remove.push_back(i);
+		} else if (node->isroot()) {
+			for (dword i = 0; i < this->children.size(); i++) {
+				if (this->children[i]->isroot()) {
+					this->children[i]->lookup();
+					((FSRoot*)this->children[i])->refresh(force, this->children[i]);
+				} else {
+					this->refresh(force, this->children[i]);
 				}
-			} else {
-				if (!this->refreshChild(force, this, this->children[i])) {
-					remove.push_back(i);
-				}
-			}
-		}
-		if (remove.size() > 0) {
-			reverse(remove.begin(), remove.end());
-			for (dword i = 0; i < remove.size(); i++) {
-				delete this->children[remove[i]];
-				this->children.erase(this->children.begin() + remove[i]);
 			}
 		}
 		this->timer.start();
 	}
+}
+
+void FSRoot::refresh(bool force) {
+	this->lookup();
+	this->refresh(force, this);
 }

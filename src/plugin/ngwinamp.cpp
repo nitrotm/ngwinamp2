@@ -312,10 +312,8 @@ bool NGWINAMP::pl_delfile(const vector<dword> &indexes) {
 bool NGWINAMP::pl_swapfile(dword index1, dword index2) {
 	NGLOCKER lock(this);
 
-	if (index1 >= 0 && index2 >= 0 && index1 < this->pl_getlength() && index2 < this->pl_getlength()) {
-		SendMessage(this->hplaylist, WM_WA_IPC, (WPARAM)IPC_PE_SWAPINDEX, (LPARAM)index1);
-		SendMessage(this->hplaylist, WM_WA_IPC, (WPARAM)IPC_PE_SWAPINDEX, (LPARAM)index2);
-		SendMessage(this->hplaylist, WM_WA_IPC, (WPARAM)IPC_PE_SWAPINDEX, (LPARAM)index1);
+	if (index1 >= 0 && index2 >= 0 && index1 < 0xFFFF && index2 < 0xFFFF && index1 < this->pl_getlength() && index2 < this->pl_getlength()) {
+		SendMessage(this->hplaylist, WM_WA_IPC, (WPARAM)IPC_PE_SWAPINDEX, (LPARAM)(((index1 & 0xFFFF) << 16) | (index2 & 0xFFFF)));
 		return true;
 	}
 	return false;

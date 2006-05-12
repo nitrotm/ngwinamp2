@@ -1,9 +1,13 @@
 // plugin.cpp
 #include "plugin.h"
+#include "../config.h"
+#include "../fs.h"
+#include "../netdata.h"
+#include "ngwinampserver.h"
 
 
-NGWINAMPSERVER *PLUGIN::pwinamp = NULL;
-HINSTANCE		PLUGIN::hInstance = NULL;
+NGWINAMP	*PLUGIN::pwinamp = NULL;
+HINSTANCE	PLUGIN::hInstance = NULL;
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
@@ -39,14 +43,14 @@ int init() {
 		PLUGIN::pwinamp = new NGWINAMPSERVER(winamp.hwndParent);
 	}
 	if (PLUGIN::pwinamp != NULL) {
-		PLUGIN::pwinamp->start();
+		((NGWINAMPSERVER*)PLUGIN::pwinamp)->start();
 	}
 	return 0;
 }
 
 void quit() {
 	if (PLUGIN::pwinamp != NULL) {
-		delete PLUGIN::pwinamp;
+		delete ((NGWINAMPSERVER*)PLUGIN::pwinamp);
 		PLUGIN::pwinamp = NULL;
 	}
 	PLUGIN::hInstance = NULL;

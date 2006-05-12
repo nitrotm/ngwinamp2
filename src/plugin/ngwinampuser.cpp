@@ -1,5 +1,13 @@
 // ngwinampuser.cpp
 #include "plugin.h"
+#include "../config.h"
+#include "../fs.h"
+#include "../net.h"
+#include "../netaddr.h"
+#include "../netdata.h"
+#include "ngwinampserver.h"
+#include "ngwinampcon.h"
+#include "ngwinampuser.h"
 
 
 NGWINAMPUSER::NGWINAMPUSER(NGWINAMPSERVER *pserver, const string &username, const string &password) : NGLOCK(), pserver(pserver), username(username), password(password), access(0), maxcon(0), timeout(0.0), byte_in(0), byte_out(0) {
@@ -201,9 +209,11 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 	NGLOCKER locker(this);
 	NGBUFFER buffer;
 
+#ifdef _DEBUG
 	char tmp[512];
 	sprintf(tmp, "NGWINAMPUSER::main() process (code=%u,param1=%08X,param2=%08X,flags=%08X,param3=%.02f,size=%08X,size2=%08X)", prequest->hdr.code, prequest->hdr.param1, prequest->hdr.param2, prequest->hdr.flags, prequest->hdr.param3, prequest->hdr.size, prequest->hdr.size2);
 	DEBUGWRITE(tmp);
+#endif
 
 	if (this->canread()) {
 		switch (prequest->hdr.code) {
@@ -610,10 +620,12 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 dword NGWINAMPUSER::authenticate(const string &password, const SOCKADDR_IN &address) {
 	NGLOCKER locker(this);
 
+#ifdef _DEBUG
 	char tmp[512];
 	sprintf(tmp, "NGWINAMPUSER::authenticate() login (username=%s,password=%s,ip=%u.%u.%u.%u)", this->username.c_str(), password.c_str(),
 		address.sin_addr.S_un.S_un_b.s_b1, address.sin_addr.S_un.S_un_b.s_b2, address.sin_addr.S_un.S_un_b.s_b3, address.sin_addr.S_un.S_un_b.s_b4);
 	DEBUGWRITE(tmp);
+#endif
 
 	if (this->connections.size() >= this->maxcon) {
 		return NGWINAMP_AUTH_TOOMANYCON;

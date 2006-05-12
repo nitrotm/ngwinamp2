@@ -1,5 +1,9 @@
 // ngwinampcon.cpp
 #include "plugin.h"
+#include "../net.h"
+#include "../netaddr.h"
+#include "../netdata.h"
+#include "ngwinampcon.h"
 
 
 NGWINAMPCON::NGWINAMPCON(SOCKET s, const SOCKADDR_IN &address, double timeout) : NGLOCK(), s(s), timeout(timeout), defaultflags(0), eof(false) {
@@ -7,7 +11,7 @@ NGWINAMPCON::NGWINAMPCON(SOCKET s, const SOCKADDR_IN &address, double timeout) :
 
 	ioctlsocket(s, FIONBIO, &enabled);
 	memcpy(&this->address, &address, sizeof(SOCKADDR_IN));
-	memset(&this->snapshot, 0, sizeof(NETSERVERSNAPSHOT));
+	memset(&this->snapshot, 0, sizeof(NETSNAPSHOT));
 	this->snapshot.mflags = NGWINAMP_SNAPSHOT_ALL;
 	this->timer.start();
 	DEBUGWRITE("NGWINAMPCON::NGWINAMPCON() new connection...");
@@ -178,9 +182,11 @@ bool NGWINAMPCON::answer(NETDATA *panswer) {
 		panswer->hdr.flags |= this->defaultflags;
 		panswer->compress();
 
+#ifdef _DEBUG
 		char tmp[512];
 		sprintf(tmp, "NGWINAMPCON::enqueue() answer (code=%u,param1=%08X,param2=%08X,flags=%08X,param3=%.02f,size=%08X,size2=%08X)", panswer->hdr.code, panswer->hdr.param1, panswer->hdr.param2, panswer->hdr.flags, panswer->hdr.param3, panswer->hdr.size, panswer->hdr.size2);
 		DEBUGWRITE(tmp);
+#endif
 
 		this->answers.push_back(panswer);
 		return true;

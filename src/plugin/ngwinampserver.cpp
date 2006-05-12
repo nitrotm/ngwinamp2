@@ -1,5 +1,13 @@
 // ngwinampserver.cpp
 #include "plugin.h"
+#include "../config.h"
+#include "../fs.h"
+#include "../net.h"
+#include "../netaddr.h"
+#include "../netdata.h"
+#include "ngwinampserver.h"
+#include "ngwinampcon.h"
+#include "ngwinampuser.h"
 
 
 NGWINAMPSERVER::NGWINAMPSERVER(HWND hwndplugin) : NGWINAMP(hwndplugin), hthread(NULL), swait(INVALID_SOCKET), shares(NULL, "", vector<string>()) {
@@ -102,6 +110,11 @@ void NGWINAMPSERVER::readcfg(const string &filename) {
 
 	CFGNode sharedefs = server.getchild("shares");
 
+	if (sharedefs.exists("refresh")) {
+		this->cfg_sharerefresh = sharedefs.getchild("refresh").getfloat();
+	} else {
+		this->cfg_sharerefresh = 300.0;
+	}
 	for (dword i = 0; i < sharedefs.size(); i++) {
 		this->appendshare(&this->shares, sharedefs.getchild(i));
 	}
@@ -202,7 +215,7 @@ bool NGWINAMPSERVER::init(void) {
 	ResetEvent(this->hquit);
 	SetEvent(this->hrunning);
 	this->readcfg("c:\\test.cfg");
-	this->shares.refreshChilds(true);
+	this->shares.refresh(true);
 	this->sharetimer.start();
 
 	// create listening socket
@@ -293,8 +306,8 @@ void NGWINAMPSERVER::main(void) {
 	this->gc();
 
 	// refresh shares
-	if (this->sharetimer.pick() > 10.0) {
-		this->shares.refreshChilds(false);
+	if (this->cfg_sharerefresh > 0.0 && this->sharetimer.pick() > this->cfg_sharerefresh) {
+		this->shares.refresh(false);
 		this->sharetimer.start();
 	}
 }
@@ -411,9 +424,11 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 	string		 username, password;
 	dword		 code = NGWINAMP_AUTH_NOTDONE;
 
+#ifdef _DEBUG
 	char tmp[512];
 	sprintf(tmp, "NGWINAMPSERVER::main() request (code=%u,param1=%08X,param2=%08X,flags=%08X,param3=%.02f,size=%08X,size2=%08X)", prequest->hdr.code, prequest->hdr.param1, prequest->hdr.param2, prequest->hdr.flags, prequest->hdr.param3, prequest->hdr.size, prequest->hdr.size2);
 	DEBUGWRITE(tmp);
+#endif
 
 	// check authentication
 	if (prequest->hdr.code == NGWINAMP_REQ_AUTH) {
@@ -452,23 +467,23 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 
 				// reply
 				if (prequest->hdr.code == NGWINAMP_REQ_AUTH) {
-					NETSERVERINFO infos;
+					NETAUTH infos;
 
-					memset(&infos, 0, sizeof(NETSERVERINFO));
+					memset(&infos, 0, sizeof(NETAUTH));
 //					infos.periodecount = ;
 //					infos.periodetime = ;
 					infos.timeout = puser->gettimeout();
-					pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH, NGWINAMP_AUTH_SUCCESS, 0, 0, 0.0, &infos, sizeof(NETSERVERINFO)));
+					pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH, NGWINAMP_AUTH_SUCCESS, 0, 0, 0.0, &infos, sizeof(NETAUTH)));
 				}
 				if (prequest->hdr.code == NGWINAMP_REQ_AUTH_EX) {
-					NETSERVERINFOEX infos;
+					NETAUTHEX infos;
 
-					memset(&infos, 0, sizeof(NETSERVERINFOEX));
+					memset(&infos, 0, sizeof(NETAUTHEX));
 //					infos.periodecount = ;
 //					infos.periodetime = ;
 					infos.timeout = puser->gettimeout();
 					infos.access = puser->getaccess();
-					pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH_EX, NGWINAMP_AUTH_SUCCESS, 0, 0, 0.0, &infos, sizeof(NETSERVERINFOEX)));
+					pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH_EX, NGWINAMP_AUTH_SUCCESS, 0, 0, 0.0, &infos, sizeof(NETAUTHEX)));
 				}
 
 				// move connection into authorized pool

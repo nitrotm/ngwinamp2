@@ -24,7 +24,7 @@ protected:
 	string			name;
 	string			path;
 
-	virtual bool allowrefresh(bool force);
+	bool lookup(void);
 
 
 public:
@@ -53,8 +53,6 @@ public:
 	void clear(void);
 
 	const FSNode* find(const string &path) const;
-
-	virtual void refreshChilds(bool force);
 };
 
 
@@ -63,11 +61,10 @@ protected:
 	vector<string>	exts;
 	vector<string>	users;
 	NGTIMER			timer;
-	double			refresh;
+	double			timeout;
 	bool			recursive;
 
-	static bool refreshChild(bool force, FSRoot *root, FSNode *node);
-	bool allowrefresh(bool force);
+	void refresh(bool force, FSNode *node);
 
 
 public:
@@ -85,7 +82,7 @@ public:
 	void del(const string &name);
 
 
-	void refreshChilds(bool force);
+	void refresh(bool force);
 };
 
 
