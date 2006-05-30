@@ -5,6 +5,7 @@
 #include "../net.h"
 #include "../netaddr.h"
 #include "../netdata.h"
+#include "ngwinamp.h"
 #include "ngwinampserver.h"
 #include "ngwinampcon.h"
 #include "ngwinampuser.h"

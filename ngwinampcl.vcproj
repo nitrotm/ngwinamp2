@@ -2,7 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="ngwinamp"
+	Name="ngwinampcl"
+	ProjectGUID="{06634B6A-4FC9-493F-B09B-01DEC09BF4C8}"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -11,46 +12,46 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory=".\bin/release/plugin"
-			IntermediateDirectory=".\bin/release/plugin"
-			ConfigurationType="2"
+			Name="Debug|Win32"
+			OutputDirectory=".\bin/debug/client"
+			IntermediateDirectory=".\bin/debug/client"
+			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;NGWINAMP_EXPORTS"
-				StringPooling="TRUE"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
+				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;OEMRESOURCE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=""
-				AssemblerListingLocation=".\bin/release/plugin/"
-				ObjectFile=".\bin/release/plugin/"
-				ProgramDataBaseFileName=".\bin/release/plugin/"
+				AssemblerListingLocation=".\bin/debug/client/"
+				ObjectFile=".\bin/debug/client/"
+				ProgramDataBaseFileName=".\bin/debug/client/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib comctl32.lib shlwapi.lib Mpr.lib odbc32.lib odbccp32.lib"
-				OutputFile="bin/release/gen_ngwinamp.dll"
+				OutputFile=".\bin/debug/ngwinampcl.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ProgramDatabaseFile=".\bin/release/plugin/gen_ngwinamp.pdb"
-				ImportLibrary=""
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\bin/debug/client/ngwinampcl.pdb"
+				SubSystem="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="_DEBUG"
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\bin/release/plugin/ngwinamp.tlb"
+				TypeLibraryName=".\debug/ngwinampcl.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -60,7 +61,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="_DEBUG"
 				Culture="4108"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
@@ -74,46 +75,46 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory=".\bin/debug/plugin"
-			IntermediateDirectory=".\bin/debug/plugin"
-			ConfigurationType="2"
+			Name="Release|Win32"
+			OutputDirectory=".\bin/release/client/"
+			IntermediateDirectory=".\bin/release/client/"
+			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;NGWINAMP_EXPORTS"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;OEMRESOURCE"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=""
-				AssemblerListingLocation=".\bin/debug/plugin/"
-				ObjectFile=".\bin/debug/plugin/"
-				ProgramDataBaseFileName=".\bin/debug/plugin/"
+				AssemblerListingLocation=".\bin/release/client/"
+				ObjectFile=".\bin/release/client/"
+				ProgramDataBaseFileName=".\bin/release/client/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"/>
+				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib comctl32.lib shlwapi.lib Mpr.lib odbc32.lib odbccp32.lib"
-				OutputFile="bin/debug/gen_ngwinamp.dll"
+				OutputFile=".\bin/release/ngwinampcl.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\bin/debug/plugin/gen_ngwinamp.pdb"
-				ImportLibrary=""
+				ProgramDatabaseFile=".\bin/release/client/ngwinampcl.pdb"
+				SubSystem="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="NDEBUG"
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\bin/debug/plugin/ngwinamp.tlb"
+				TypeLibraryName=".\release/ngwinampcl.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -123,7 +124,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="NDEBUG"
 				Culture="4108"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
@@ -144,10 +145,22 @@
 			Name="res"
 			Filter="">
 			<File
-				RelativePath=".\res\plugin\ngwinamp.rc">
+				RelativePath=".\res\client\current.ico">
 			</File>
 			<File
-				RelativePath=".\res\plugin\resource.h">
+				RelativePath=".\res\client\default.ico">
+			</File>
+			<File
+				RelativePath=".\res\client\directory.ico">
+			</File>
+			<File
+				RelativePath=".\res\client\ngwinampcl.rc">
+			</File>
+			<File
+				RelativePath=".\res\client\resource.h">
+			</File>
+			<File
+				RelativePath=".\res\client\song.ico">
 			</File>
 		</Filter>
 		<Filter
@@ -181,37 +194,25 @@
 				RelativePath=".\src\util.h">
 			</File>
 			<Filter
-				Name="plugin"
+				Name="client"
 				Filter="">
 				<File
-					RelativePath=".\src\plugin\ngwinamp.cpp">
+					RelativePath=".\src\client\client.cpp">
 				</File>
 				<File
-					RelativePath=".\src\plugin\ngwinamp.h">
+					RelativePath=".\src\client\client.h">
 				</File>
 				<File
-					RelativePath=".\src\plugin\ngwinampcon.cpp">
+					RelativePath=".\src\client\mainwnd.cpp">
 				</File>
 				<File
-					RelativePath=".\src\plugin\ngwinampcon.h">
+					RelativePath=".\src\client\mainwnd.h">
 				</File>
 				<File
-					RelativePath=".\src\plugin\ngwinampserver.cpp">
+					RelativePath=".\src\client\ngwinampclient.cpp">
 				</File>
 				<File
-					RelativePath=".\src\plugin\ngwinampserver.h">
-				</File>
-				<File
-					RelativePath=".\src\plugin\ngwinampuser.cpp">
-				</File>
-				<File
-					RelativePath=".\src\plugin\ngwinampuser.h">
-				</File>
-				<File
-					RelativePath=".\src\plugin\plugin.cpp">
-				</File>
-				<File
-					RelativePath=".\src\plugin\plugin.h">
+					RelativePath=".\src\client\ngwinampclient.h">
 				</File>
 			</Filter>
 			<Filter
@@ -246,34 +247,6 @@
 				</File>
 				<File
 					RelativePath=".\src\zzip\zziplib.h">
-				</File>
-			</Filter>
-			<Filter
-				Name="sdk"
-				Filter="">
-				<File
-					RelativePath=".\src\sdk\dsp.h">
-				</File>
-				<File
-					RelativePath=".\src\sdk\gen.h">
-				</File>
-				<File
-					RelativePath=".\src\sdk\in2.h">
-				</File>
-				<File
-					RelativePath=".\src\sdk\ipc_pe.h">
-				</File>
-				<File
-					RelativePath=".\src\sdk\out.h">
-				</File>
-				<File
-					RelativePath=".\src\sdk\wa_dlg.h">
-				</File>
-				<File
-					RelativePath=".\src\sdk\wa_hotkeys.h">
-				</File>
-				<File
-					RelativePath=".\src\sdk\wa_ipc.h">
 				</File>
 			</Filter>
 		</Filter>

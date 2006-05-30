@@ -264,29 +264,17 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_SONG                ICON                    "song.ico"
-IDI_DEFAULT             ICON                    "default.ico"
-IDI_CURRENT             ICON                    "current.ico"
-IDI_DIRECTORY           ICON                    "directory.ico"
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Version
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,1,0
- PRODUCTVERSION 1,1,1,0
+ FILEVERSION 2,0,0,0
+ PRODUCTVERSION 2,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
- FILEFLAGS 0x1L
+ FILEFLAGS 0x3L
 #else
- FILEFLAGS 0x0L
+ FILEFLAGS 0x2L
 #endif
  FILEOS 0x40004L
  FILETYPE 0x2L
@@ -296,15 +284,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Release date : 13/01/2005"
             VALUE "FileDescription", "Remote control plugin for Winamp V2.x & V5.x"
-            VALUE "FileVersion", "1, 1, 1, 0"
+            VALUE "FileVersion", "2, 0, 0, 0"
             VALUE "InternalName", "NGWinamp"
-            VALUE "LegalCopyright", "by nitro@webmails.com"
+            VALUE "LegalCopyright", "nitro.tm@gmail.com"
             VALUE "LegalTrademarks", "Freeware !!"
             VALUE "OriginalFilename", "gen_ngwinamp.dll"
             VALUE "ProductName", "NGWinamp"
-            VALUE "ProductVersion", "1, 1, 1, 0"
+            VALUE "ProductVersion", "2, 0, 0, 0"
         END
     END
     BLOCK "VarFileInfo"

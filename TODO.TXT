@@ -1,0 +1,51 @@
+NGWinamp Developpement Roadmap
+------------------------------
+
+[server]
+- (check) apply user rights everywhere (ctrl,playlist,shares...)
+- (todo) add fs stats (and import/export) -> play count, vote count, ...
+- (todo) voting system -> add to list ordered by bigger vote count
+- (todo) get current user rights request
+- (todo) get most played songs request
+- (todo) get directories request
+- (todo) get file list by range request
+- (todo) get winamp infos request (stop,play,pause,version,...)
+- (todo) get current song infos request (sample, bitrate, channel)
+- (todo) get/set current EQ values request
+- (todo) restart winamp request
+- (todo) auto change notifications to client
+- (todo) plugin support (extends request/response, interact with winamp interface)
+
+
+[client]
+- unified interface for all clients
+- resizeable windows (main with file-browser)
+- integrate file browser into main window
+- browser with filename, size & date (allow sort key)
+- playing position as hh:mm:ss
+- tray-icon with quick controls
+- fine-tune volume span
+
+
+
+Some technical details about future developpement :
+
+v2.0.x
+------
+- [feature]   extended informations for files in playlist (length, rate, channels, tags...)
+- [graphical] tree-view browser with cache, more friendly, last path memory...
+- [graphical] favorite paths in browser interface
+- [graphical] client interfaces fully resizable
+- [graphical] a lots of improvements, eventually skin's support
+
+
+v2.x
+----
+- [feature]   windows explorer's drag & drop if applicable
+- [feature]   adding song file integrated into explorer's shell if possible (mean command-line options)
+- [feature]   binary and/or scripted plugin's support (mean some official SDK)
+- [feature]   chat & exchange services between users
+- [security]  crypted authorization password
+- [server]    built-in web-server to provide direct web client interface (without PHP).
+- [graphical] configuration GUI for client-side (dialogbox to customize parameters)
+- [webclient] final web interface with PHP (ngwinamp.class.php + ngwinamp.php)

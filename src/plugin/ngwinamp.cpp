@@ -1,5 +1,8 @@
 // ngwinamp.cpp
 #include "plugin.h"
+#include "ngwinamp.h"
+#include "../sdk/wa_ipc.h"
+#include "../sdk/ipc_pe.h"
 
 
 NGWINAMP::NGWINAMP(HWND hwndplugin) : NGLOCK() {
@@ -273,16 +276,16 @@ bool NGWINAMP::pl_insfile(dword index, const vector<string> &filenames) {
 	if (index >= 0 && index <= this->pl_getlength()) {
 		for (dword i = 0; i < filenames.size(); i++) {
 			COPYDATASTRUCT	cds; 
-			PE_FILEINFO		fi;
+			fileinfo		fi;
 
-			memset(&fi, 0, sizeof(PE_FILEINFO));
+			memset(&fi, 0, sizeof(fileinfo));
 			strcpy(fi.file, filenames[i].c_str());
 			fi.index = (int)index + i;
 
 			memset(&cds, 0, sizeof(COPYDATASTRUCT));
 			cds.dwData = IPC_PE_INSERTFILENAME; 
 			cds.lpData = (void *)&fi; 
-			cds.cbData = sizeof(PE_FILEINFO); 
+			cds.cbData = sizeof(fileinfo); 
 			SendMessage(this->hplaylist, WM_COPYDATA, (WPARAM)NULL, (LPARAM)&cds); 
 		}
 		return true;

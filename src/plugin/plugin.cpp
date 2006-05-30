@@ -3,11 +3,22 @@
 #include "../config.h"
 #include "../fs.h"
 #include "../netdata.h"
+#include "ngwinamp.h"
 #include "ngwinampserver.h"
+#include "../sdk/gen.h"
 
 
-NGWINAMP	*PLUGIN::pwinamp = NULL;
-HINSTANCE	PLUGIN::hInstance = NULL;
+
+
+int  init();
+void quit();
+void config();
+
+
+NGWINAMP					*pwinamp = NULL;
+HINSTANCE					hInstance = NULL;
+char						name[] = NGWINAMP_NAME;
+winampGeneralPurposePlugin	winamp = {GPPHDR_VER, name, init, config, quit, NULL, NULL};
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
@@ -29,31 +40,24 @@ BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
 }
 
 
-int  init();
-void quit();
-void config();
-
-char			name[] = NGWINAMP_NAME;
-WINAMP_GENDATA	winamp = {GPPHDR_VER, name, init, config, quit, NULL, NULL};
-
 
 int init() {
-	PLUGIN::hInstance = winamp.hDllInstance;
-	if (PLUGIN::pwinamp == NULL) {
-		PLUGIN::pwinamp = new NGWINAMPSERVER(winamp.hwndParent);
+	hInstance = winamp.hDllInstance;
+	if (pwinamp == NULL) {
+		pwinamp = new NGWINAMPSERVER(winamp.hwndParent);
 	}
-	if (PLUGIN::pwinamp != NULL) {
-		((NGWINAMPSERVER*)PLUGIN::pwinamp)->start();
+	if (pwinamp != NULL) {
+		((NGWINAMPSERVER*)pwinamp)->start();
 	}
 	return 0;
 }
 
 void quit() {
-	if (PLUGIN::pwinamp != NULL) {
-		delete ((NGWINAMPSERVER*)PLUGIN::pwinamp);
-		PLUGIN::pwinamp = NULL;
+	if (pwinamp != NULL) {
+		delete ((NGWINAMPSERVER*)pwinamp);
+		pwinamp = NULL;
 	}
-	PLUGIN::hInstance = NULL;
+	hInstance = NULL;
 }
 
 void config() {
@@ -63,7 +67,7 @@ void config() {
 
 
 extern "C" {
-	__declspec(dllexport) HWINAMP_GENDATA winampGetGeneralPurposePlugin() {
+	__declspec(dllexport) winampGeneralPurposePlugin* winampGetGeneralPurposePlugin() {
 		return &winamp;
 	}
 }

@@ -54,7 +54,8 @@ typedef struct hostent     SOCKHOSTENT;
 #define NGWINAMP_REQ_BWGETROOTS		200
 #define NGWINAMP_REQ_BWGETLIST		201
  // snapshots
-#define NGWINAMP_REQ_SNAPSHOT		300
+#define NGWINAMP_REQ_GETSNAPSHOT	300
+#define NGWINAMP_REQ_GETSNAPSHOT_EX	301
 
 
 
@@ -78,7 +79,7 @@ typedef struct hostent     SOCKHOSTENT;
 #define NGWINAMP_ANS_BWROOTS		200
 #define NGWINAMP_ANS_BWLIST			201
  // snapshots
-#define NGWINAMP_ANS_SNAPSHOT		300 // TODO
+#define NGWINAMP_ANS_SNAPSHOT_EX	301 // TODO
 
 
 // authentication answer (NGWINAMP_ANS_AUTH)

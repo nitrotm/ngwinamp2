@@ -4,11 +4,7 @@
 
 
 // constantes de configuration
-#define NGWINAMP_MAXANONYMOUSPERMACHINE	2
-
-#define NGWINAMP_NETBUFFERSIZE			4096
-#define NGWINAMP_NETBLOCKTIME			1
-#define NGWINAMP_NETINITIALTIMEOUT		1000
+#define NGWINAMP_NAME					"NGWinamp - TCP/IP RC v2.0.0[beta]"
 
 
 // constantes génériques
@@ -25,7 +21,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include "../res/resource.h"
 
 using namespace std;
 

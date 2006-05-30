@@ -80,7 +80,6 @@ public:
 	void   pl_sortbyname(void);
 	void   pl_removedeadfiles(void);
 };
-typedef NGWINAMP* HNGWINAMP;
 
 
 #endif //_NGWINAMP_H_INCLUDE_

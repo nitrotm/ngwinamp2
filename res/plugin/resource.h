@@ -2,10 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by ngwinamp.rc
 //
-#define IDI_SONG                        101
-#define IDI_DIRECTORY                   102
-#define IDI_DEFAULT                     103
-#define IDI_CURRENT                     104
 #define IDD_HELP                        109
 #define IDD_CONFIG                      110
 #define IDD_ADMIN                       150
