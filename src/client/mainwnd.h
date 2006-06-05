@@ -1,3 +1,4 @@
+// mainwnd.h
 #ifndef _MAINWND_H_INCLUDE_
 #define _MAINWND_H_INCLUDE_
 
@@ -11,12 +12,12 @@
 
 #define TOOLBOX_MAX_COUNT	0x04
 #define TOOLBOX_CONNECT		0x00
-#define TOOLBOX_ADMIN		0x01
-#define TOOLBOX_USER		0x02
-#define TOOLBOX_GUEST		0x03
+#define TOOLBOX_CONNECTING	0x01
+#define TOOLBOX_ADMIN		0x02
+#define TOOLBOX_USER		0x03
 
 
-class NGMainWnd {
+class NGMainWnd : public NGLOCK {
 protected:
 	// global
 	HINSTANCE	hinstance;
@@ -38,6 +39,7 @@ protected:
 	HWND		htoolboxwnd[TOOLBOX_MAX_COUNT];
 	int			toolboxwidth[TOOLBOX_MAX_COUNT];
 	int			toolboxheight[TOOLBOX_MAX_COUNT];
+	int			toolboxminwidth;
 	int			curtoolbox;
 	// middlebar
 	bool		hresize;
@@ -52,26 +54,39 @@ protected:
 	int			plwidth;
 	int			plheight;
 
+	// network client
+	NGWINAMPCLIENT *client;
+
 
 public:
 	NGMainWnd(HINSTANCE hinstance);
 	virtual ~NGMainWnd();
 
 
-	bool init();
-	bool free();
+	bool init(void);
+	bool free(void);
 
 	bool create(int x, int y, int width, int height);
-	bool destroy();
+	bool destroy(void);
 
-	bool main();
+	bool main(void);
 
-	bool on_created(HWND hwnd);
-	bool on_close();
+	// window events
+	bool onwnd_created(HWND hwnd);
+	bool onwnd_close(void);
+	bool onwnd_resized(void);
+	bool onwnd_mousemove(int mx, int my, bool mousedown);
+	bool onwnd_command(WPARAM nc, WPARAM id);
 
-	bool on_resized(int width, int height);
+	// network events
+	bool onnet_connected(bool success, const string &title, const string &message);
+	bool onnet_disconnect(void);
+	bool onnet_authfailed(dword code);
+	bool onnet_authsuccess(const NETAUTH &auth);
+	bool onnet_authsuccess(const NETAUTHEX &auth);
 
-	bool on_mousemove(int mx, int my, bool mousedown);
+
+	void toolbox_select(int id);
 };
 
 

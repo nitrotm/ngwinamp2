@@ -164,7 +164,7 @@ bool NGWINAMPCON::sendmsg(void) {
 NETDATA* NGWINAMPCON::request(void) {
 	NGLOCKER locker(this);
 
-	if (!this->isclosed() && !this->eof && this->requests.size() > 0) {
+	if (!this->isclosed() && this->requests.size() > 0) {
 		NETDATA *prequest = this->requests[0];
 
 		this->requests.erase(this->requests.begin());

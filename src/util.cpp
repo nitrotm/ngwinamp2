@@ -206,13 +206,16 @@ string pathappendslash(const string &filename) {
 
 #ifdef _DEBUG
 
-void debugclear() {
-	CloseHandle(CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL));
+static char DEBUGFILEPATH[MAX_PATH];
+
+void debugclear(const char *path) {
+	strcpy(DEBUGFILEPATH, path);
+	CloseHandle(CreateFile(DEBUGFILEPATH, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL));
 }
 
 void debugwrite(const char *text) {
 	SYSTEMTIME	st;
-	HANDLE		hFile = CreateFile("C:\\ngwinamp.log", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
+	HANDLE		hFile = CreateFile(DEBUGFILEPATH, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
 	DWORD		bw;
 	char		cd[256];
 

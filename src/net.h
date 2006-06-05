@@ -3,11 +3,6 @@
 #define _NET_H_INCLUDE_
 
 
-// socket structures
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct hostent     SOCKHOSTENT;
-
-
 // authentification code
 #define NGWINAMP_AUTH_SUCCESS		0x0
 #define NGWINAMP_AUTH_FAILURE		0x1

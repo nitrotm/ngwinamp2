@@ -1,4 +1,8 @@
 #include "client.h"
+#include "../net.h"
+#include "../netaddr.h"
+#include "../netdata.h"
+#include "ngwinampclient.h"
 #include "mainwnd.h"
 
 
@@ -8,22 +12,67 @@ NGMainWnd *pmainwnd;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR Parameters, int ShowValue) {
 	INITCOMMONCONTROLSEX icc;
+	WSADATA				 wd;
+	int					 ret = 0;
+
+	DEBUGCLEAR("c:\\ngwinampcl.exe.log");
+	DEBUGWRITE("WinMain() client startup");
 
 	icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
 	icc.dwICC = ICC_BAR_CLASSES | ICC_INTERNET_CLASSES | ICC_LISTVIEW_CLASSES |
 		ICC_PROGRESS_CLASS | ICC_TREEVIEW_CLASSES | ICC_UPDOWN_CLASS;
-	if (!InitCommonControlsEx(&icc)) {
-		return 1;
-	}
+	if (InitCommonControlsEx(&icc)) {
+		pmainwnd = new NGMainWnd(hInstance);
+		if (pmainwnd != NULL) {
+			DEBUGWRITE("WinMain() main window interface created");
 
-	pmainwnd = new NGMainWnd(hInstance);
-	if (pmainwnd->init()) {
-		if (pmainwnd->create(CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT)) {
-			pmainwnd->main();
+			WSAStartup(MAKEWORD(2, 0), &wd);
+			DEBUGWRITE("WinMain() winsock dll loaded");
+
+			if (pmainwnd->init()) {
+				DEBUGWRITE("WinMain() main window initialized");
+				if (pmainwnd->create(CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT)) {
+					DEBUGWRITE("WinMain() main window created, entering main loop...");
+					pmainwnd->main();
+					DEBUGWRITE("WinMain() main window closed, exit main loop...");
+				} else {
+					DEBUGWRITE("WinMain() failed to create main window !");
+				}
+				pmainwnd->destroy();
+				DEBUGWRITE("WinMain() main window destroyed");
+			} else {
+				DEBUGWRITE("WinMain() failed to initialize main window !");
+				ret = 3;
+			}
+
+			WSACleanup();
+			DEBUGWRITE("WinMain() winsock dll freed");
+
+			pmainwnd->free();
+			delete pmainwnd;
+			DEBUGWRITE("WinMain() main window interface freed");
+		} else {
+			DEBUGWRITE("WinMain() failed to create main window interface !");
+			ret = 2;
 		}
-		pmainwnd->destroy();
+	} else {
+		DEBUGWRITE("WinMain() failed to initialize common controls !");
+		ret = 1;
 	}
-	pmainwnd->free();
-	delete pmainwnd;
-	return 0;
+	DEBUGWRITE("WinMain() client exit");
+	return ret;
 }
+
+
+string textbox_getstring(HWND hwnd, int id) {
+	string	ret;
+	char	*buffer;
+	int		length = GetWindowTextLength(GetDlgItem(hwnd, id));
+
+	buffer = new char[length + 1];
+	GetDlgItemText(hwnd, id, buffer, length + 1);
+	ret = string(buffer);
+	delete [] buffer;
+	return ret;
+}
+

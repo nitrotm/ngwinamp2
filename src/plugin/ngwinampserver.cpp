@@ -23,20 +23,20 @@ NGWINAMPSERVER::~NGWINAMPSERVER() {
 }
 
 
-bool NGWINAMPSERVER::isrunning() {
+bool NGWINAMPSERVER::isrunning(void) {
 	NGLOCKER locker(this);
 
 	return (WaitForSingleObject(this->hrunning, 10) == WAIT_OBJECT_0);
 }
 
-bool NGWINAMPSERVER::isquit() {
+bool NGWINAMPSERVER::isquit(void) {
 	NGLOCKER locker(this);
 
 	return (WaitForSingleObject(this->hquit, 10) == WAIT_OBJECT_0);
 }
 
 
-bool NGWINAMPSERVER::start() {
+bool NGWINAMPSERVER::start(void) {
 	NGLOCKER locker(this);
 
 	if (this->hthread == NULL && !this->isrunning()) {
@@ -49,7 +49,7 @@ bool NGWINAMPSERVER::start() {
 	return false;
 }
 
-bool NGWINAMPSERVER::stop() {
+bool NGWINAMPSERVER::stop(void) {
 	// request mainloop end
 	this->lock();
 	SetEvent(this->hquit);
@@ -70,7 +70,7 @@ bool NGWINAMPSERVER::stop() {
 
 
 void NGWINAMPSERVER::readcfg(const string &filename) {
-	this->cfg.read("c:\\ngwinamp.cfg");
+	this->cfg.read(filename);
 
 	CFGNode server = this->cfg.get("server");
 
@@ -215,17 +215,35 @@ bool NGWINAMPSERVER::init(void) {
 	// init data
 	ResetEvent(this->hquit);
 	SetEvent(this->hrunning);
-	this->readcfg("c:\\test.cfg");
+	this->readcfg("c:\\ngwinamp.cfg");
 	this->shares.refresh(true);
 	this->sharetimer.start();
 
-	// create listening socket
+	// resolve bind address
 	SOCKADDR_IN	addr;
-	dword		enabled = 1;
 
 	memset(&addr, 0, sizeof(SOCKADDR_IN));
 	addr.sin_family = AF_INET;
+	if (this->cfg_address.length() > 0) {
+		PHOSTENT phost = gethostbyname(this->cfg_address.c_str());
+
+		if (phost == NULL) {
+			DEBUGWRITE("NGWINAMPSERVER::init() cannot resolve bind address !");
+			return false;
+		}
+		if (phost->h_length != 4) {
+			DEBUGWRITE("NGWINAMPSERVER::init() invalid bind address (not IPv4) !");
+			return false;
+		}
+		addr.sin_addr.S_un.S_un_b.s_b1 = phost->h_addr_list[0][0];
+		addr.sin_addr.S_un.S_un_b.s_b2 = phost->h_addr_list[0][1];
+		addr.sin_addr.S_un.S_un_b.s_b3 = phost->h_addr_list[0][2];
+		addr.sin_addr.S_un.S_un_b.s_b4 = phost->h_addr_list[0][3];
+	}
 	addr.sin_port = htons(this->cfg_port);
+
+	// create listening socket
+	dword enabled = 1;
 
 	this->swait = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (this->swait == INVALID_SOCKET) {
@@ -248,7 +266,7 @@ bool NGWINAMPSERVER::init(void) {
 	return true;
 }
 
-void NGWINAMPSERVER::free() {
+void NGWINAMPSERVER::free(void) {
 	NGLOCKER locker(this);
 
 	// close all connections
@@ -271,6 +289,7 @@ void NGWINAMPSERVER::free() {
 	this->shares.clear();
 	ResetEvent(this->hquit);
 	ResetEvent(this->hrunning);
+	this->hthread = NULL;
 
 	DEBUGWRITE("NGWINAMPSERVER::free()");
 }

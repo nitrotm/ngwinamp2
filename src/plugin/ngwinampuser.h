@@ -64,11 +64,11 @@ public:
 	void   deny(const NETADDR &addr);
 	void   allow(const NETADDR &addr);
 
-	string getusername();
-	string getpassword();
-	dword  getaccess();
-	dword  getmaxcon();
-	double gettimeout();
+	string getusername(void);
+	string getpassword(void);
+	dword  getaccess(void);
+	dword  getmaxcon(void);
+	double gettimeout(void);
 	bool   hasaccess(dword what);
 	bool   canread(void);
 	bool   canwrite(void);

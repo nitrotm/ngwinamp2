@@ -108,27 +108,27 @@ void NGWINAMPUSER::allow(const NETADDR &addr) {
 }
 
 
-string NGWINAMPUSER::getusername() {
+string NGWINAMPUSER::getusername(void) {
 	NGLOCKER locker(this);
 
 	return this->username;
 }
-string NGWINAMPUSER::getpassword() {
+string NGWINAMPUSER::getpassword(void) {
 	NGLOCKER locker(this);
 
 	return this->password;
 }
-dword NGWINAMPUSER::getaccess() {
+dword NGWINAMPUSER::getaccess(void) {
 	NGLOCKER locker(this);
 
 	return this->access;
 }
-dword NGWINAMPUSER::getmaxcon() {
+dword NGWINAMPUSER::getmaxcon(void) {
 	NGLOCKER locker(this);
 
 	return this->maxcon;
 }
-double NGWINAMPUSER::gettimeout() {
+double NGWINAMPUSER::gettimeout(void) {
 	NGLOCKER locker(this);
 
 	return this->timeout;

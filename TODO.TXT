@@ -14,12 +14,12 @@ NGWinamp Developpement Roadmap
 - (todo) get/set current EQ values request
 - (todo) restart winamp request
 - (todo) auto change notifications to client
+- (todo) add configuration dialog (with server restart)
 - (todo) plugin support (extends request/response, interact with winamp interface)
 
 
 [client]
 - unified interface for all clients
-- resizeable windows (main with file-browser)
 - integrate file browser into main window
 - browser with filename, size & date (allow sort key)
 - playing position as hh:mm:ss

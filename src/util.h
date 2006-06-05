@@ -34,11 +34,11 @@ public:
 		memcpy(&this->l_time, &src.l_time, sizeof(LARGE_INTEGER));
 	}
 
-	void start() {
+	void start(void) {
 		QueryPerformanceCounter(&this->s_time);
 		memcpy(&this->l_time, &this->s_time, sizeof(LARGE_INTEGER));
 	}
-	double pick() {
+	double pick(void) {
 		LARGE_INTEGER current;
 
 		QueryPerformanceCounter(&current);
@@ -50,10 +50,10 @@ public:
 		}
 		return this->sdelta;
 	}
-	double getdelta() {
+	double getdelta(void) {
 		return this->sdelta;
 	}
-	double getelapsed() {
+	double getelapsed(void) {
 		return this->selapsed;
 	}
 };
@@ -85,11 +85,11 @@ public:
 		DeleteCriticalSection(&this->l);
 	}
 
-	void lock() {
+	void lock(void) {
 		EnterCriticalSection(&this->l);
 		this->count++;
 	}
-	void unlock() {
+	void unlock(void) {
 		if (this->count > 0) {
 			this->count--;
 			LeaveCriticalSection(&this->l);
@@ -116,11 +116,11 @@ public:
 		}
 	}
 
-	void acquire() {
+	void acquire(void) {
 		this->lock->lock();
 		this->count++;
 	}
-	void release() {
+	void release(void) {
 		if (this->count > 0) {
 			this->count--;
 			this->lock->unlock();
@@ -160,7 +160,7 @@ public:
 		this->bsize = size;
 		this->ptr = new byte[size];
 	}
-	void free() {
+	void free(void) {
 		if (this->ptr != NULL) {
 			delete [] this->ptr;
 			this->ptr = NULL;
@@ -195,7 +195,7 @@ public:
 		}
 		return string();
 	}
-	string tostring() const {
+	string tostring(void) const {
 		return this->tostring(0, this->bsize);
 	}
 
@@ -297,17 +297,18 @@ bool pathisdirectory(const string &filename);
 
 // Debug utilities
 #ifdef _DEBUG
-void debugclear();
+
+void debugclear(const char *path);
 void debugwrite(const char *text);
 void debugwrite(const string &text);
 
-#define DEBUGCLEAR			debugclear()
+#define DEBUGCLEAR(path)	debugclear(path)
 #define DEBUGWRITE(text)	debugwrite(text)
 
 #else
 
-#define DEBUGCLEAR			
-#define DEBUGWRITE(text)	
+#define DEBUGCLEAR(path)
+#define DEBUGWRITE(text)
 
 #endif
 

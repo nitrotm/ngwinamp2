@@ -10,9 +10,9 @@
 
 
 
-int  init();
-void quit();
-void config();
+int  init(void);
+void quit(void);
+void config(void);
 
 
 NGWINAMP					*pwinamp = NULL;
@@ -26,7 +26,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
 
 	switch (reason) {
 	case DLL_PROCESS_ATTACH:
-		DEBUGCLEAR;
+		DEBUGCLEAR("c:\\gen_ngwinamp.dll.log");
 		DEBUGWRITE("DLL attached to winamp");
 		WSAStartup(MAKEWORD(2, 0), &wd);
 		break;
@@ -41,7 +41,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
 
 
 
-int init() {
+int init(void) {
 	hInstance = winamp.hDllInstance;
 	if (pwinamp == NULL) {
 		pwinamp = new NGWINAMPSERVER(winamp.hwndParent);
@@ -52,7 +52,7 @@ int init() {
 	return 0;
 }
 
-void quit() {
+void quit(void) {
 	if (pwinamp != NULL) {
 		delete ((NGWINAMPSERVER*)pwinamp);
 		pwinamp = NULL;
@@ -60,7 +60,7 @@ void quit() {
 	hInstance = NULL;
 }
 
-void config() {
+void config(void) {
 	DEBUGWRITE("ngwinamp config()...");
 //	openconfig(&PLUGIN::plugin, PLUGIN::plugin.pwinamp->getwinampwnd());
 }

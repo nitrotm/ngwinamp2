@@ -109,11 +109,11 @@ public:
 	NGWINAMPSERVER(HWND hwndplugin);
 	virtual ~NGWINAMPSERVER();
 
-	bool isrunning();
-	bool isquit();
+	bool isrunning(void);
+	bool isquit(void);
 
-	bool start();
-	bool stop();
+	bool start(void);
+	bool stop(void);
 
 	const FSNode* findshare(const string &path);
 	vector<string> getfilepaths(const string &username, const string &path);
