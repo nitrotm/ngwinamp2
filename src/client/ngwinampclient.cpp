@@ -97,6 +97,10 @@ bool NGWINAMPCLIENT::authenticate(const string &username, const string &password
 	return this->answer(new NETDATA(NGWINAMP_REQ_AUTH_EX, 0, 0, 0, 0.0, data));
 }
 
+bool NGWINAMPCLIENT::requestSnapshot(void) {
+	return this->answer(new NETDATA(NGWINAMP_REQ_GETSNAPSHOT, 0, 0, 0, 0.0));
+}
+
 
 
 bool NGWINAMPCLIENT::init(void) {
@@ -321,13 +325,6 @@ bool NGWINAMPCLIENT::process(void) {
 #endif
 
 		switch (prequest->hdr.code) {
-		case NGWINAMP_ANS_AUTH:
-			NETAUTH auth;
-
-			if (prequest->buffer.read(&auth, 0, sizeof(NETAUTH)) != sizeof(NETAUTH)) {
-				return this->clientwnd->onnet_authfailed(prequest->hdr.param1);
-			}
-			return this->clientwnd->onnet_authsuccess(auth);
 		case NGWINAMP_ANS_AUTH_EX:
 			NETAUTHEX authex;
 
@@ -337,28 +334,26 @@ bool NGWINAMPCLIENT::process(void) {
 			return this->clientwnd->onnet_authsuccess(authex);
 
 		case NGWINAMP_ANS_VOLUME:
-			break;
+			return this->clientwnd->onnet_setvolume(prequest->hdr.param3);
 		case NGWINAMP_ANS_PAN:
-			break;
+			return this->clientwnd->onnet_setpan(prequest->hdr.param3);
 		case NGWINAMP_ANS_POS:
-			break;
+			return this->clientwnd->onnet_setposition(prequest->hdr.param3, prequest->hdr.param2, prequest->hdr.param1);
 
 		case NGWINAMP_ANS_PLNAMES:
 			break;
 		case NGWINAMP_ANS_PLFILES:
 			break;
-		case NGWINAMP_ANS_PLBROWSE:
-			break;
 		case NGWINAMP_ANS_PLPOS:
 			break;
 		case NGWINAMP_ANS_PLSHUFFLE:
-			break;
+			return this->clientwnd->onnet_setshuffle(prequest->hdr.param1 == NGWINAMP_ALL);
 		case NGWINAMP_ANS_PLREPEAT:
-			break;
+			return this->clientwnd->onnet_setrepeat(prequest->hdr.param1 == NGWINAMP_ALL);
 
-		case NGWINAMP_ANS_BWROOTS:
+		case NGWINAMP_ANS_BWDIRECTORY:
 			break;
-		case NGWINAMP_ANS_BWLIST:
+		case NGWINAMP_ANS_BWFILES:
 			break;
 
 		case NGWINAMP_ANS_SNAPSHOT_EX:

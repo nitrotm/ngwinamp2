@@ -490,8 +490,8 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 					NETAUTH infos;
 
 					memset(&infos, 0, sizeof(NETAUTH));
-//					infos.periodecount = ;
-//					infos.periodetime = ;
+					infos.periodecount = 0;
+					infos.periodetime = 60;
 					infos.timeout = puser->gettimeout();
 					pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH, NGWINAMP_AUTH_SUCCESS, 0, 0, 0.0, &infos, sizeof(NETAUTH)));
 				}
@@ -499,10 +499,11 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 					NETAUTHEX infos;
 
 					memset(&infos, 0, sizeof(NETAUTHEX));
-//					infos.periodecount = ;
-//					infos.periodetime = ;
-					infos.timeout = puser->gettimeout();
+					infos.vmajor = NGWINAMP_VERSION_MAJOR;
+					infos.vminor = NGWINAMP_VERSION_MINOR;
 					infos.access = puser->getaccess();
+					infos.maxconnection = puser->getmaxcon();
+					infos.timeout = puser->gettimeout();
 					pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH_EX, NGWINAMP_AUTH_SUCCESS, 0, 0, 0.0, &infos, sizeof(NETAUTHEX)));
 				}
 

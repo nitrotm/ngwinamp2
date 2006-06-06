@@ -5,6 +5,8 @@
 
 // constantes de configuration
 #define NGWINAMP_NAME					"NGWinamp - TCP/IP RC v2.0.0[beta]"
+#define NGWINAMP_VERSION_MAJOR			2
+#define NGWINAMP_VERSION_MINOR			0
 
 
 // constantes génériques

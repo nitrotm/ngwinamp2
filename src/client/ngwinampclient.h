@@ -70,6 +70,8 @@ public:
 	void shutdown(void);
 
 	bool authenticate(const string &username, const string &password);
+
+	bool requestSnapshot(void);
 };
 
 

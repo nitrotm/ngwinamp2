@@ -5,7 +5,6 @@ NGWinamp Developpement Roadmap
 - (check) apply user rights everywhere (ctrl,playlist,shares...)
 - (todo) add fs stats (and import/export) -> play count, vote count, ...
 - (todo) voting system -> add to list ordered by bigger vote count
-- (todo) get current user rights request
 - (todo) get most played songs request
 - (todo) get directories request
 - (todo) get file list by range request
@@ -19,12 +18,8 @@ NGWinamp Developpement Roadmap
 
 
 [client]
-- unified interface for all clients
-- integrate file browser into main window
 - browser with filename, size & date (allow sort key)
-- playing position as hh:mm:ss
 - tray-icon with quick controls
-- fine-tune volume span
 
 
 

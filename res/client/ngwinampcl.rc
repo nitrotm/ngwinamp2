@@ -150,7 +150,7 @@ BEGIN
                     WS_EX_STATICEDGE
     GROUPBOX        "User informations :",IDC_TOOLBOX_TITLE,7,7,386,85
     LTEXT           "Current song :",IDC_STATIC,14,18,49,8
-    LTEXT           "HH:MM:SS",IDC_STATIC,63,18,323,8
+    LTEXT           "HH:MM:SS",IDC_SONG_POSITION,63,18,323,8
     RTEXT           "Volume :",IDC_STATIC,14,66,33,8
     RTEXT           "Pan :",IDC_STATIC,14,77,33,8
     RTEXT           "NGWinamp 2.0.0(beta)",IDC_STATIC,286,68,100,8,
@@ -164,35 +164,30 @@ STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_STATICEDGE
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "<< back",IDC_BACK,16,51,60,12,BS_BITMAP,
-                    WS_EX_STATICEDGE
-    PUSHBUTTON      "play |>",IDC_PLAY,76,51,60,12,BS_BITMAP,
-                    WS_EX_STATICEDGE
-    PUSHBUTTON      "pause ||",IDC_PAUSE,136,51,60,12,BS_BITMAP,
-                    WS_EX_STATICEDGE
-    PUSHBUTTON      "stop |_|",IDC_STOP,196,51,60,12,BS_BITMAP,
-                    WS_EX_STATICEDGE
-    PUSHBUTTON      "next >>",IDC_NEXT,256,51,60,12,BS_BITMAP,
-                    WS_EX_STATICEDGE
+    PUSHBUTTON      "<< back",IDC_BACK,16,51,60,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "play |>",IDC_PLAY,76,51,60,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "pause ||",IDC_PAUSE,136,51,60,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "stop |_|",IDC_STOP,196,51,60,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "next >>",IDC_NEXT,256,51,60,12,0,WS_EX_STATICEDGE
     CONTROL         "Repeat",IDC_REPEAT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,319,48,50,8
     CONTROL         "Shuffle",IDC_SHUFFLE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,319,57,50,8
-    CONTROL         "",IDC_VOLUME,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
-                    WS_TABSTOP,50,66,200,10,WS_EX_STATICEDGE
+    CONTROL         "",IDC_VOLUME,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    WS_TABSTOP,50,66,200,10
     EDITTEXT        IDC_VOLUME_VALUE,252,66,30,10,ES_AUTOHSCROLL | NOT 
                     WS_BORDER,WS_EX_STATICEDGE
-    CONTROL         "",IDC_PAN,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
-                    WS_TABSTOP,50,77,200,10,WS_EX_STATICEDGE
+    CONTROL         "",IDC_PAN,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    WS_TABSTOP,50,77,200,10
     EDITTEXT        IDC_PAN_VALUE,252,77,30,10,ES_AUTOHSCROLL | NOT 
                     WS_BORDER,WS_EX_STATICEDGE
     EDITTEXT        IDC_SONG_TITLE,14,27,372,10,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER,WS_EX_STATICEDGE
-    CONTROL         "",IDC_SONG_PROGRESS,"msctls_progress32",0x1,16,39,368,6,
-                    WS_EX_STATICEDGE
+    CONTROL         "",IDC_SONG_PROGRESS,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    WS_TABSTOP,14,38,372,9
     GROUPBOX        "Administrator controls :",IDC_TOOLBOX_TITLE,7,7,386,85
     LTEXT           "Current song :",IDC_STATIC,14,18,49,8
-    LTEXT           "HH:MM:SS",IDC_STATIC,63,18,323,8
+    LTEXT           "HH:MM:SS",IDC_SONG_POSITION,63,18,323,8
     RTEXT           "Volume :",IDC_STATIC,14,66,33,8
     RTEXT           "Pan :",IDC_STATIC,14,77,33,8
     RTEXT           "NGWinamp 2.0.0(beta)",IDC_STATIC,286,68,100,8,

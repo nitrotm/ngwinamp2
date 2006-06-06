@@ -28,6 +28,8 @@
 #define IDC_PAN                         1019
 #define IDC_VOLUME_VALUE                1020
 #define IDC_PAN_VALUE                   1021
+#define IDC_SONG_POSITION               1022
+#define IDC_VOLUME2                     1023
 #define IDM_EXIT                        40008
 #define IDM_DISCONNECT                  40009
 #define IDM_CONNECT                     40010
@@ -54,7 +56,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        106
 #define _APS_NEXT_COMMAND_VALUE         40042
-#define _APS_NEXT_CONTROL_VALUE         1021
+#define _APS_NEXT_CONTROL_VALUE         1023
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

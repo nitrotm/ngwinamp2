@@ -3,9 +3,10 @@
 #define _MAINWND_H_INCLUDE_
 
 
-#define CURSOR_MAX_COUNT	0x02
+#define CURSOR_MAX_COUNT	0x03
 #define CURSOR_NORMAL		0x00
 #define CURSOR_HRESIZE		0x01
+#define CURSOR_VRESIZE		0x02
 
 #define ICON_MAX_COUNT		0x01
 #define ICON_MAIN			0x00
@@ -16,6 +17,7 @@
 #define TOOLBOX_ADMIN		0x02
 #define TOOLBOX_USER		0x03
 
+#define IDC_STATUSBAR		1000
 
 class NGMainWnd : public NGLOCK {
 protected:
@@ -31,28 +33,37 @@ protected:
 	HMENU		hmenu;
 	int			x;
 	int			y;
-	int			width;
-	int			height;
-	int			clientwidth;
-	int			clientheight;
+	dword		width;
+	dword		height;
+	dword		clientwidth;
+	dword		clientheight;
+	// statusbar
+	HWND		hstatuswnd;
+	dword		statuswidth;
+	dword		statusheight;
 	// toolbox
 	HWND		htoolboxwnd[TOOLBOX_MAX_COUNT];
-	int			toolboxwidth[TOOLBOX_MAX_COUNT];
-	int			toolboxheight[TOOLBOX_MAX_COUNT];
-	int			toolboxminwidth;
+	dword		toolboxwidth[TOOLBOX_MAX_COUNT];
+	dword		toolboxheight[TOOLBOX_MAX_COUNT];
+	dword		toolboxminwidth;
 	int			curtoolbox;
-	// middlebar
+	// horizontal/vertical bar
 	bool		hresize;
-	int			lastmx;
-	int			lastmy;
+	bool		vresize;
+	dword		lastmx;
+	dword		lastmy;
 	// browsewnd
 	HWND		hbrowsewnd;
-	int			browsewidth;
-	int			browseheight;
+	dword		browsewidth;
+	dword		browseheight;
+	// filelistwnd
+	HWND		hfilewnd;
+	dword		filewidth;
+	dword		fileheight;
 	// playlistwnd
 	HWND		hplwnd;
-	int			plwidth;
-	int			plheight;
+	dword		plwidth;
+	dword		plheight;
 
 	// network client
 	NGWINAMPCLIENT *client;
@@ -66,7 +77,7 @@ public:
 	bool init(void);
 	bool free(void);
 
-	bool create(int x, int y, int width, int height);
+	bool create(int x, int y, dword width, dword height);
 	bool destroy(void);
 
 	bool main(void);
@@ -74,16 +85,22 @@ public:
 	// window events
 	bool onwnd_created(HWND hwnd);
 	bool onwnd_close(void);
+	bool onwnd_sizing(dword &width, dword &height);
 	bool onwnd_resized(void);
-	bool onwnd_mousemove(int mx, int my, bool mousedown);
+	bool onwnd_mousemove(dword mx, dword my, bool mousedown);
 	bool onwnd_command(WPARAM nc, WPARAM id);
+	bool onwnd_notify(WPARAM id, LPNMHDR hdr);
 
 	// network events
 	bool onnet_connected(bool success, const string &title, const string &message);
 	bool onnet_disconnect(void);
 	bool onnet_authfailed(dword code);
-	bool onnet_authsuccess(const NETAUTH &auth);
 	bool onnet_authsuccess(const NETAUTHEX &auth);
+	bool onnet_setvolume(double volume);
+	bool onnet_setpan(double pan);
+	bool onnet_setposition(double progress, dword current, dword length);
+	bool onnet_setshuffle(bool shuffle);
+	bool onnet_setrepeat(bool repeat);
 
 
 	void toolbox_select(int id);
