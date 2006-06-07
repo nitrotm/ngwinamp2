@@ -3,7 +3,10 @@
 #define _NETADDR_H_INCLUDE_
 
 
-// adresse réseau
+/**
+  * network address
+  *
+  */
 class NETADDR {
 public:
 	byte ip[4];

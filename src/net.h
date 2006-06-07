@@ -3,19 +3,15 @@
 #define _NET_H_INCLUDE_
 
 
-// authentification code
-#define NGWINAMP_AUTH_SUCCESS		0x0
-#define NGWINAMP_AUTH_FAILURE		0x1
-#define NGWINAMP_AUTH_NOTDONE		0x2
-#define NGWINAMP_AUTH_TOOMANYCON	0x3
-
-
-// commandes (requests)
+/**
+  * Commands (requests)
+  *
+  */
 #define NGWINAMP_REQ_NONE			0
- // authentification
-#define NGWINAMP_REQ_AUTH			1 // obsolete
+ // authentication
+#define NGWINAMP_REQ_AUTH			1 // note: obsolete
 #define NGWINAMP_REQ_AUTH_EX		2
- // son
+ // sound
 #define NGWINAMP_REQ_PREV			11
 #define NGWINAMP_REQ_PLAY			12
 #define NGWINAMP_REQ_PAUSE			13
@@ -45,105 +41,79 @@
 #define NGWINAMP_REQ_PLSORTBYNAME	131
 #define NGWINAMP_REQ_PLSORTBYPATH	132
 #define NGWINAMP_REQ_PLDELDEADFILES	133
+#define NGWINAMP_REQ_PLADDVOTE		150
  // browsing
-#define NGWINAMP_REQ_BWGETROOTS		200 // obsolete
-#define NGWINAMP_REQ_BWGETLIST		201 // obsolete
-#define NGWINAMP_REQ_BWGETDIRECTORY	202 // TODO
-#define NGWINAMP_REQ_BWGETFILES		203 // TODO
+#define NGWINAMP_REQ_BWGETROOTS		200 // note: obsolete
+#define NGWINAMP_REQ_BWGETLIST		201 // note: obsolete
+#define NGWINAMP_REQ_BWGETDIRECTORY	202 // note: TODO
+#define NGWINAMP_REQ_BWGETFILES		203 // note: TODO
  // snapshots
-#define NGWINAMP_REQ_GETSNAPSHOT	300 // obsolete
-#define NGWINAMP_REQ_GETSNAPSHOT_EX	301 // TODO
+#define NGWINAMP_REQ_GETSNAPSHOT	300 // note: obsolete
+#define NGWINAMP_REQ_GETSNAPSHOT_EX	301 // note: TODO
+ // administration
+#define NGWINAMP_REQA_GETSHARES		500 // note: TODO
+#define NGWINAMP_REQA_SETSHARE		501 // note: TODO
+#define NGWINAMP_REQA_ADDSHARE		502 // note: TODO
+#define NGWINAMP_REQA_DELSHARE		503 // note: TODO
+#define NGWINAMP_REQA_GETUSERS		510 // note: TODO
+#define NGWINAMP_REQA_SETUSER		511 // note: TODO
+#define NGWINAMP_REQA_ADDUSER		512 // note: TODO
+#define NGWINAMP_REQA_DELUSER		513 // note: TODO
+#define NGWINAMP_REQA_GETCLIENTS	520 // note: TODO
+#define NGWINAMP_REQA_KILLCLIENT	521 // note: TODO
+#define NGWINAMP_REQA_RESTART		550 // note: TODO
 
 
-
-// réponses (answers)
+/**
+  * Commands (answers)
+  *
+  */
 #define NGWINAMP_ANS_NONE			0
- // authentification
-#define NGWINAMP_ANS_AUTH			1 // obsolete
+ // authentication
+#define NGWINAMP_ANS_AUTH			1 // note: obsolete
 #define NGWINAMP_ANS_AUTH_EX		2
- // son
+ // sound
 #define NGWINAMP_ANS_VOLUME			21
 #define NGWINAMP_ANS_PAN			23
 #define NGWINAMP_ANS_POS			25
  // playlist
 #define NGWINAMP_ANS_PLNAMES		101
 #define NGWINAMP_ANS_PLFILES		103
-#define NGWINAMP_ANS_PLBROWSE		107 // obsolete
+#define NGWINAMP_ANS_PLBROWSE		107 // note: obsolete
 #define NGWINAMP_ANS_PLPOS			111
 #define NGWINAMP_ANS_PLSHUFFLE		121
 #define NGWINAMP_ANS_PLREPEAT		123
  // browsing
-#define NGWINAMP_ANS_BWROOTS		200 // obsolete
-#define NGWINAMP_ANS_BWLIST			201 // obsolete
-#define NGWINAMP_ANS_BWDIRECTORY	202 // TODO
-#define NGWINAMP_ANS_BWFILES		203 // TODO
+#define NGWINAMP_ANS_BWROOTS		200 // note: obsolete
+#define NGWINAMP_ANS_BWLIST			201 // note: obsolete
+#define NGWINAMP_ANS_BWDIRECTORY	202 // note: TODO
+#define NGWINAMP_ANS_BWFILES		203 // note: TODO
  // snapshots
-#define NGWINAMP_ANS_SNAPSHOT_EX	301 // TODO
+#define NGWINAMP_ANS_SNAPSHOT_EX	301 // note: TODO
 
 
-// authentication answer (NGWINAMP_ANS_AUTH)
+/**
+  * Compression & filters
+  *
+  */
+#define NGWINAMP_FILTER_NONE		0x00000000
+#define NGWINAMP_FILTER_ZZIP		0x00000001
+#define NGWINAMP_FILTER_ALLOWZZIP	0x00000002
+
+
+/**
+  * Network header
+  *
+  */
 typedef struct {
-	dword			periodecount;
-	double			periodetime;
-	double			timeout;
-	dword			reserved;
-} NETAUTH;
-
-// authentication answer (NGWINAMP_ANS_AUTH_EX)
-#define NGWINAMPUSER_ACCESS_NONE		0x00000000
-#define NGWINAMPUSER_ACCESS_READ		0x00000001
-#define NGWINAMPUSER_ACCESS_WRITE		0x00000002
-#define NGWINAMPUSER_ACCESS_ADMIN		0x00000004
-#define NGWINAMPUSER_ACCESS_PL_ADD		0x00000008
-#define NGWINAMPUSER_ACCESS_PL_SET		0x00000010
-#define NGWINAMPUSER_ACCESS_PL_DEL		0x00000020
-#define NGWINAMPUSER_ACCESS_PL_CTRL		0x00000040
-#define NGWINAMPUSER_ACCESS_SN_BACK		0x00000080
-#define NGWINAMPUSER_ACCESS_SN_PLAY		0x00000100
-#define NGWINAMPUSER_ACCESS_SN_PAUSE	0x00000200
-#define NGWINAMPUSER_ACCESS_SN_STOP		0x00000400
-#define NGWINAMPUSER_ACCESS_SN_NEXT		0x00000800
-#define NGWINAMPUSER_ACCESS_SN_VOLUME	0x00001000
-#define NGWINAMPUSER_ACCESS_SN_PAN		0x00002000
-#define NGWINAMPUSER_ACCESS_SN_POS		0x00004000
-
-typedef struct {
-	// server part
-	byte			vmajor;
-	byte			vminor;
-	// client part
-	dword			access;
-	dword			maxconnection;
-	double			timeout;
-} NETAUTHEX;
-
-
-// snapshot answer (NGWINAMP_ANS_SNAPSHOT)
-#define NGWINAMP_SNAPSHOT_NONE					0x00000000
-#define NGWINAMP_SNAPSHOT_SN_VOLUME				0x00000001
-#define NGWINAMP_SNAPSHOT_SN_PAN				0x00000002
-#define NGWINAMP_SNAPSHOT_SN_POSMS				0x00000004
-#define NGWINAMP_SNAPSHOT_SN_LENGTH				0x00000008
-#define NGWINAMP_SNAPSHOT_PL_POS				0x00000010
-#define NGWINAMP_SNAPSHOT_PL_LENGTH				0x00000020
-#define NGWINAMP_SNAPSHOT_PL_SHUFFLE			0x00000040
-#define NGWINAMP_SNAPSHOT_PL_REPEAT				0x00000080
-#define NGWINAMP_SNAPSHOT_ALL					0xFFFFFFFF
-
-#define NGWINAMP_SNAPSHOT_HASFLAG(pcon, flag)	(((pcon)->snapshot.mflags & (flag)) != 0)
-
-typedef struct {
-	dword  mflags;
-
-	double sn_volume;
-	double sn_pan;
-	dword  sn_posms;
-	dword  sn_length;
-	dword  pl_pos;
-	dword  pl_length;
-	bool   pl_shuffle;
-	bool   pl_repeat;
-} NETSNAPSHOT;
+	dword			code;
+	dword			param1;
+	dword			param2;
+	dword			flags;
+	double			param3;
+	dword			size;
+	dword			size2;
+} NETHDR;
 
 
 #endif //_NET_H_INCLUDE_

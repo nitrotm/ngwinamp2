@@ -1,10 +1,16 @@
 // ngwinampclient.cpp
-#include "client.h"
+#include "../global.h"
+#include "../util.h"
 #include "../net.h"
 #include "../netaddr.h"
 #include "../netdata.h"
+#include "../netauth.h"
+#include "client.h"
 #include "ngwinampclient.h"
 #include "mainwnd.h"
+
+
+int WINAPI NGWINAMPCLIENT_thread(NGWINAMPCLIENT *pclient);
 
 
 NGWINAMPCLIENT::NGWINAMPCLIENT(NGMainWnd *clientwnd) : NGLOCK(), clientwnd(clientwnd), sclient(INVALID_SOCKET), hthread(NULL), hrunning(NULL), hquit(NULL), defaultflags(0), timeout(0), eof(false) {

@@ -3,6 +3,10 @@
 #define _NGWINAMPCON_H_INCLUDE_
 
 
+/**
+  * Client connection manager
+  *
+  */
 class NGWINAMPCON : public NGLOCK {
 protected:
 	friend class NGWINAMPSERVER;

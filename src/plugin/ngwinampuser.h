@@ -3,6 +3,10 @@
 #define _NGWINAMPUSER_H_INCLUDE_
 
 
+/**
+  * User manager
+  *
+  */
 class NGWINAMPUSER : public NGLOCK {
 protected:
 	friend class NGWINAMPSERVER;

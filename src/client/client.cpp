@@ -1,7 +1,10 @@
-#include "client.h"
+#include "../global.h"
+#include "../util.h"
 #include "../net.h"
 #include "../netaddr.h"
 #include "../netdata.h"
+#include "../netauth.h"
+#include "client.h"
 #include "ngwinampclient.h"
 #include "mainwnd.h"
 
@@ -63,17 +66,3 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR Parameter
 	DEBUGWRITE("WinMain() client exit");
 	return ret;
 }
-
-
-string textbox_getstring(HWND hwnd, int id) {
-	string	ret;
-	char	*buffer;
-	int		length = GetWindowTextLength(GetDlgItem(hwnd, id));
-
-	buffer = new char[length + 1];
-	GetDlgItemText(hwnd, id, buffer, length + 1);
-	ret = string(buffer);
-	delete [] buffer;
-	return ret;
-}
-

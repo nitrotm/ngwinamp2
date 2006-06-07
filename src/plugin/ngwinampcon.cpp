@@ -1,8 +1,11 @@
 // ngwinampcon.cpp
-#include "plugin.h"
+#include "../global.h"
+#include "../util.h"
 #include "../net.h"
 #include "../netaddr.h"
 #include "../netdata.h"
+#include "../netsnapshot.h"
+#include "plugin.h"
 #include "ngwinampcon.h"
 
 

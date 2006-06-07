@@ -7,9 +7,10 @@ class NGMainWnd;
 class NGWINAMPCLIENT;
 
 
-int WINAPI NGWINAMPCLIENT_thread(NGWINAMPCLIENT *pclient);
-
-
+/**
+  * Connection manager
+  *
+  */
 class NGWINAMPCLIENT : public NGLOCK {
 protected:
 	friend int WINAPI NGWINAMPCLIENT_thread(NGWINAMPCLIENT *pclient);

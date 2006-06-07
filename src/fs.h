@@ -3,6 +3,13 @@
 #define _FS_H_INCLUDE_
 
 
+class FSRoot;
+
+
+/**
+  * Node types
+  *
+  */
 #define FS_TYPE_NONE		0x00000000
 #define FS_TYPE_LOCAL		0x00000002
 #define FS_TYPE_REMOTE		0x00000004
@@ -10,9 +17,10 @@
 #define FS_TYPE_DIRECTORY	0x00000020
 
 
-class FSRoot;
-
-
+/**
+  * Base node
+  *
+  */
 class FSNode {
 protected:
 	friend class FSRoot;
@@ -56,6 +64,10 @@ public:
 };
 
 
+/**
+  * Root node
+  *
+  */
 class FSRoot : public FSNode {
 protected:
 	vector<string>	exts;

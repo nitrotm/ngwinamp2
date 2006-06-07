@@ -1,26 +1,28 @@
 // ngwinamp.cpp
-#include "plugin.h"
-#include "ngwinamp.h"
+#include "../global.h"
+#include "../util.h"
 #include "../sdk/wa_ipc.h"
 #include "../sdk/ipc_pe.h"
+#include "plugin.h"
+#include "ngwinamp.h"
 
 
 NGWINAMP::NGWINAMP(HWND hwndplugin) : NGLOCK() {
 	int version;
 
-	// initialisation
+	// initialization
 	this->hplugin = hwndplugin;
 	this->versionmajor = 0;
 	this->versionminor = 0;
 
-	// version de winamp
+	// winamp version
 	version = SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)0, (LPARAM)IPC_GETVERSION);
 	if (version > 0) {
 		this->versionmajor = (version >> 8) & 0xFF;
 		this->versionminor = version & 0xFF;
 	}
 
-	// chargement des fenêtres
+	// window loading
 	if (this->versionmajor >= 20) {
 		this->hwinamp = FindWindow("Winamp v1.x", NULL);
 		if(this->versionminor >= 90) {
@@ -51,7 +53,7 @@ word NGWINAMP::getminorversion(void) const {
 }
 
 
-// control
+// basic controls
 bool NGWINAMP::isplaying(void) {
 	NGLOCKER lock(this);
 
@@ -106,7 +108,7 @@ void NGWINAMP::next(void) {
 	}
 }
 
-// song
+// sound controls
 double NGWINAMP::sn_getvolume(void) {
 	NGLOCKER lock(this);
 
@@ -183,7 +185,7 @@ dword NGWINAMP::sn_getlength(void) {
 	return 0;
 }
 
-// playlist
+// playlist controls
 void NGWINAMP::pl_clear(void) {
 	NGLOCKER lock(this);
 

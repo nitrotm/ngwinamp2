@@ -3,7 +3,10 @@
 #define _NGWINAMP_H_INCLUDE_
 
 
-// classe de contrôle de winamp
+/**
+  * Winamp control class
+  *
+  */
 class NGWINAMP : public NGLOCK {
 private:
 	// infos
@@ -29,7 +32,7 @@ private:
 */
 
 public:
-	// constructeur / destructeur
+	// constructor / destructor
 	NGWINAMP(HWND hwndplugin);
 	virtual ~NGWINAMP();
 
@@ -39,7 +42,7 @@ public:
 	word   getmajorversion(void) const;
 	word   getminorversion(void) const;
 
-	// control
+	// basic controls
 	bool   isplaying(void);
 	bool   ispaused(void);
 	void   prev(void);
@@ -48,7 +51,7 @@ public:
 	void   stop(void);
 	void   next(void);
 
-	// song
+	// sound controls
 	double sn_getvolume(void);
 	void   sn_setvolume(double volume);
 	double sn_getpan(void);
@@ -58,7 +61,7 @@ public:
 	void   sn_setpos(double pos);
 	dword  sn_getlength(void);
 
-	// playlist
+	// playlist controls
 	void   pl_clear(void);
 	dword  pl_getlength(void);
 	void   pl_setlength(dword length);

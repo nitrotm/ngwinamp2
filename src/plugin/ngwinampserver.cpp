@@ -1,14 +1,21 @@
 // ngwinampserver.cpp
-#include "plugin.h"
+#include "../global.h"
+#include "../util.h"
 #include "../config.h"
 #include "../fs.h"
 #include "../net.h"
 #include "../netaddr.h"
 #include "../netdata.h"
+#include "../netsnapshot.h"
+#include "../netauth.h"
+#include "plugin.h"
 #include "ngwinamp.h"
 #include "ngwinampserver.h"
 #include "ngwinampcon.h"
 #include "ngwinampuser.h"
+
+
+int WINAPI NGWINAMPSERVER_thread(NGWINAMPSERVER *pserver);
 
 
 NGWINAMPSERVER::NGWINAMPSERVER(HWND hwndplugin) : NGWINAMP(hwndplugin), hthread(NULL), swait(INVALID_SOCKET), shares(NULL, "", vector<string>()) {
@@ -451,7 +458,7 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 #endif
 
 	// check authentication
-	if (prequest->hdr.code == NGWINAMP_REQ_AUTH) {
+	if (prequest->hdr.code == NGWINAMP_REQ_AUTH) { // note: obsolete
 		if (prequest->hdr.size > 0) {
 			// password -> "admin"
 			username = "admin";
@@ -486,7 +493,7 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 				pconnection->settimeout(puser->gettimeout());
 
 				// reply
-				if (prequest->hdr.code == NGWINAMP_REQ_AUTH) {
+				if (prequest->hdr.code == NGWINAMP_REQ_AUTH) { // note: obsolete
 					NETAUTH infos;
 
 					memset(&infos, 0, sizeof(NETAUTH));
@@ -516,7 +523,7 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 	}
 	if (prequest->hdr.code == NGWINAMP_REQ_AUTH_EX) {
 		pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH_EX, code, 0, 0, 0.0));
-	} else {
+	} else { // note: obsolete
 		pconnection->answer(new NETDATA(NGWINAMP_ANS_AUTH, code, 0, 0, 0.0));
 	}
 	return false;

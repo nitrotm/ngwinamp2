@@ -1,10 +1,14 @@
 // ngwinampuser.cpp
-#include "plugin.h"
+#include "../global.h"
+#include "../util.h"
 #include "../config.h"
 #include "../fs.h"
 #include "../net.h"
 #include "../netaddr.h"
 #include "../netdata.h"
+#include "../netsnapshot.h"
+#include "../netauth.h"
+#include "plugin.h"
 #include "ngwinamp.h"
 #include "ngwinampserver.h"
 #include "ngwinampcon.h"
@@ -320,7 +324,7 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			}
 			return true;
 
-		case NGWINAMP_REQ_BWGETROOTS:
+		case NGWINAMP_REQ_BWGETROOTS: // note: obsolete
 			{
 				word  length = 1;
 
@@ -331,7 +335,7 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 				}
 			}
 			return true;
-		case NGWINAMP_REQ_BWGETLIST:
+		case NGWINAMP_REQ_BWGETLIST: // note: obsolete
 			{
 				vector<string>	dirs;
 				vector<string>	files;
@@ -364,7 +368,7 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			}
 			return true;
 
-		case NGWINAMP_REQ_GETSNAPSHOT:
+		case NGWINAMP_REQ_GETSNAPSHOT: // note: obsolete
 			NGWINAMP_SNAPSHOT_SN_SETVOLUME(pconnection, this->pserver->sn_getvolume());
 			if (NGWINAMP_SNAPSHOT_HASFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_VOLUME)) {
 				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_VOLUME, 0, 0, 0, this->pserver->sn_getvolume()))) {
@@ -414,6 +418,18 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 				}
 				NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_REPEAT);
 			}
+			return true;
+
+		case NGWINAMP_REQ_BWGETDIRECTORY:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQ_BWGETFILES:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQ_GETSNAPSHOT_EX:
+			// note: TODO
 			return true;
 		}
 	}
@@ -609,8 +625,51 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 		}
 	}
 	if (this->canadmin()) {
-//		switch (prequest->hdr.code) {
-//		}
+		switch (prequest->hdr.code) {
+		case NGWINAMP_REQA_GETSHARES:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_SETSHARE:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_ADDSHARE:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_DELSHARE:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_GETUSERS:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_SETUSER:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_ADDUSER:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_DELUSER:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_GETCLIENTS:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_KILLCLIENT:
+			// note: TODO
+			return true;
+
+		case NGWINAMP_REQA_RESTART:
+			// note: TODO
+			return true;
+		}
 		return true;
 	}
 	DEBUGWRITE("Error processing request for " + this->username + " !");

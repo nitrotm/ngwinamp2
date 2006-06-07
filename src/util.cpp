@@ -1,5 +1,6 @@
 // util.cpp
 #include "global.h"
+#include "util.h"
 
 
 string strreplace(const string &value, char src, char dst) {

@@ -3,25 +3,10 @@
 #define _NETDATA_H_INCLUDE_
 
 
-// compression & filters
-#define NGWINAMP_FILTER_NONE		0x00000000
-#define NGWINAMP_FILTER_ZZIP		0x00000001
-#define NGWINAMP_FILTER_ALLOWZZIP	0x00000002
-
-
-// header réseau
-typedef struct {
-	dword			code;
-	dword			param1;
-	dword			param2;
-	dword			flags;
-	double			param3;
-	dword			size;
-	dword			size2;
-} NETHDR;
-
-
-// transferts de données
+/**
+  * Network request/answer
+  *
+  */
 class NETDATA {
 public:
 	NETHDR		hdr;
@@ -92,7 +77,7 @@ public:
 		return false;
 	}
 	bool uncompress(void) {
-// COMPATIBILITY
+// note: compatibility
 //		if ((this->hdr.flags & NGWINAMP_FILTER_ALLOWZZIP) != 0) {
 			if ((this->hdr.flags & NGWINAMP_FILTER_ZZIP) != 0) {
 				dword size = this->buffer.size() + 32;

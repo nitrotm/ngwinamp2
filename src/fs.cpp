@@ -1,5 +1,6 @@
 // fs.cpp
 #include "global.h"
+#include "util.h"
 #include "fs.h"
 
 

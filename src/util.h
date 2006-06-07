@@ -3,10 +3,6 @@
 #define _UTIL_H_INCLUDE_
 
 
-// zzip library
-#include "zzip/zziplib.h"
-
-
 /**
   * Timer object
   *
@@ -278,14 +274,20 @@ public:
 };
 
 
-// String utilities
+/**
+  * String utilities
+  *
+  */
 string strreplace(const string &value, char src, char dst);
 string strreplace(const string &value, const string &src, const string &dst, dword level = 0);
 string strtrim(const string &value);
 string strstrip(const string &value, const string &separator);
 vector<string> strsplit(const string &value, const string &separator, dword limit, bool withseparator = true);
 
-// Path utilities
+/**
+  * Path utilities
+  *
+  */
 vector<string> getdirectoryitems(const string &filename, const vector<string> &exts);
 string pathappendslash(const string &filename);
 bool pathexists(const string &filename);
@@ -294,8 +296,10 @@ bool pathisurl(const string &filename);
 bool pathisfile(const string &filename);
 bool pathisdirectory(const string &filename);
 
-
-// Debug utilities
+/**
+  * Debug utilities
+  *
+  */
 #ifdef _DEBUG
 
 void debugclear(const char *path);

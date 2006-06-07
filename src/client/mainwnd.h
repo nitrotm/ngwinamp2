@@ -3,22 +3,43 @@
 #define _MAINWND_H_INCLUDE_
 
 
+/**
+  * Cursors
+  *
+  */
 #define CURSOR_MAX_COUNT	0x03
 #define CURSOR_NORMAL		0x00
 #define CURSOR_HRESIZE		0x01
 #define CURSOR_VRESIZE		0x02
 
+/**
+  * Icons
+  *
+  */
 #define ICON_MAX_COUNT		0x01
 #define ICON_MAIN			0x00
 
+/**
+  * Toolboxes
+  *
+  */
 #define TOOLBOX_MAX_COUNT	0x04
 #define TOOLBOX_CONNECT		0x00
 #define TOOLBOX_CONNECTING	0x01
 #define TOOLBOX_ADMIN		0x02
 #define TOOLBOX_USER		0x03
 
+/**
+  * Custom control IDs
+  *
+  */
 #define IDC_STATUSBAR		1000
 
+
+/**
+  * Main window controller
+  *
+  */
 class NGMainWnd : public NGLOCK {
 protected:
 	// global
@@ -104,6 +125,9 @@ public:
 
 
 	void toolbox_select(int id);
+
+
+	static string textbox_getstring(HWND hwnd, int id);
 };
 
 

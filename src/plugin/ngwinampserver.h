@@ -7,55 +7,11 @@ class NGWINAMPSERVER;
 class NGWINAMPUSER;
 class NGWINAMPCON;
 
-int WINAPI NGWINAMPSERVER_thread(NGWINAMPSERVER *pserver);
 
-
-#define NGWINAMP_SNAPSHOT_SETFLAG(pcon, flag)	(pcon)->snapshot.mflags |= (flag)
-#define NGWINAMP_SNAPSHOT_RESETFLAG(pcon, flag)	(pcon)->snapshot.mflags &= ~(flag)
-
-#define NGWINAMP_SNAPSHOT_SN_SETVOLUME(pcon, value)						\
-	if ((pcon)->snapshot.sn_volume != value) {							\
-		(pcon)->snapshot.sn_volume = value;								\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_SN_VOLUME);	\
-	}
-#define NGWINAMP_SNAPSHOT_SN_SETPAN(pcon, value)						\
-	if ((pcon)->snapshot.sn_pan != value) {								\
-		(pcon)->snapshot.sn_pan = value;								\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_SN_PAN);		\
-	}
-#define NGWINAMP_SNAPSHOT_SN_SETPOSMS(pcon, value)						\
-	if ((pcon)->snapshot.sn_posms != value) {							\
-		(pcon)->snapshot.sn_posms = value;								\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_SN_POSMS);	\
-	}
-#define NGWINAMP_SNAPSHOT_SN_SETLENGTH(pcon, value)						\
-	if ((pcon)->snapshot.sn_length != value) {							\
-		(pcon)->snapshot.sn_length = value;								\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_SN_LENGTH);	\
-	}
-
-#define NGWINAMP_SNAPSHOT_PL_SETPOS(pcon, value)						\
-	if ((pcon)->snapshot.pl_pos != value) {								\
-		(pcon)->snapshot.pl_pos = value;								\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_PL_POS);		\
-	}
-#define NGWINAMP_SNAPSHOT_PL_SETLENGTH(pcon, value)						\
-	if ((pcon)->snapshot.pl_length != value) {							\
-		(pcon)->snapshot.pl_length = value;								\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_PL_LENGTH);	\
-	}
-#define NGWINAMP_SNAPSHOT_PL_SETSHUFFLE(pcon, value)					\
-	if ((pcon)->snapshot.pl_shuffle != value) {							\
-		(pcon)->snapshot.pl_shuffle = value;							\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_PL_SHUFFLE);	\
-	}
-#define NGWINAMP_SNAPSHOT_PL_SETREPEAT(pcon, value)						\
-	if ((pcon)->snapshot.pl_repeat != value) {							\
-		(pcon)->snapshot.pl_repeat = value;								\
-		NGWINAMP_SNAPSHOT_SETFLAG(pcon, NGWINAMP_SNAPSHOT_PL_REPEAT);	\
-	}
-
-
+/**
+  * Server manager
+  *
+  */
 class NGWINAMPSERVER : public NGWINAMP {
 protected:
 	friend int WINAPI NGWINAMPSERVER_thread(NGWINAMPSERVER *pserver);

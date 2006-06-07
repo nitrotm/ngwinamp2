@@ -154,6 +154,9 @@
 			Name="src"
 			Filter="">
 			<File
+				RelativePath=".\src\config.cpp">
+			</File>
+			<File
 				RelativePath=".\src\config.h">
 			</File>
 			<File
@@ -172,7 +175,13 @@
 				RelativePath=".\src\netaddr.h">
 			</File>
 			<File
+				RelativePath=".\src\netauth.h">
+			</File>
+			<File
 				RelativePath=".\src\netdata.h">
+			</File>
+			<File
+				RelativePath=".\src\netsnapshot.h">
 			</File>
 			<File
 				RelativePath=".\src\util.cpp">
