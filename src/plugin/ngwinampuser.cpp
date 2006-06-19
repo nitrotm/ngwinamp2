@@ -420,7 +420,7 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			}
 			return true;
 
-		case NGWINAMP_REQ_BWGETDIRECTORY:
+		case NGWINAMP_REQ_BWGETDIRECTORIES:
 			// note: TODO
 			return true;
 

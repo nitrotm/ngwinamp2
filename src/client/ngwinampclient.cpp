@@ -317,7 +317,10 @@ bool NGWINAMPCLIENT::answer(NETDATA *panswer) {
 bool NGWINAMPCLIENT::process(void) {
 	NGLOCKER locker(this);
 
-	if (this->isrunning() && this->requests.size() > 0) {
+	if (!this->isrunning()) {
+		return false;
+	}
+	if (this->requests.size() > 0) {
 		NETDATA *prequest = this->requests[0];
 
 		this->requests.erase(this->requests.begin());
@@ -357,15 +360,21 @@ bool NGWINAMPCLIENT::process(void) {
 		case NGWINAMP_ANS_PLREPEAT:
 			return this->clientwnd->onnet_setrepeat(prequest->hdr.param1 == NGWINAMP_ALL);
 
-		case NGWINAMP_ANS_BWDIRECTORY:
+		case NGWINAMP_ANS_BWDIRECTORIES:
 			break;
 		case NGWINAMP_ANS_BWFILES:
 			break;
 
 		case NGWINAMP_ANS_SNAPSHOT_EX:
 			break;
+
+		case NGWINAMP_ANSA_SHARES:
+			break;
+		case NGWINAMP_ANSA_USERS:
+			break;
+		case NGWINAMP_ANSA_CLIENTS:
+			break;
 		}
-		return true;
 	}
 	return true;
 }
