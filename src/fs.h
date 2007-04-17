@@ -41,6 +41,7 @@ public:
 	virtual ~FSNode();
 
 	virtual bool isroot(void) const;
+	virtual bool isurl(void) const;
 	bool isfile(void) const;
 	bool isdirectory(void) const;
 	bool islocal(void) const;
@@ -53,6 +54,7 @@ public:
 
 	virtual bool hasaccess(const string &user) const;
 	virtual void mergeusers(const vector<string> &users);
+	dword getsubdirectorycount(const string &user) const;
 	vector<string> listdirectories(const string &user) const;
 	vector<string> listfiles(const string &user) const;
 
@@ -95,6 +97,19 @@ public:
 
 
 	void refresh(bool force);
+};
+
+
+/**
+  * Root URL node
+  *
+  */
+class FSURLRoot : public FSRoot {
+public:
+	FSURLRoot(FSNode *parent, const string &name, const vector<string> &users, const string &path);
+	virtual ~FSURLRoot();
+
+	bool isurl(void) const;
 };
 
 

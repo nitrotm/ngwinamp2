@@ -10,46 +10,50 @@
 class NGWINAMP : public NGLOCK {
 private:
 	// infos
-	word	versionmajor;
-	word	versionminor;
+	word		versionmajor;
+	word		versionminor;
 
 	// gui
-	HWND	hwinamp;
-	HWND	hplaylist;
-	HWND	hplugin;
+	HINSTANCE	hinstance;
+	HWND		hwinamp;
+	HWND		hplaylist;
+	HWND		hplugin;
 /*
 	// current data
-	dword			au_volume;
-	dword			au_pan;
-	dword			pl_position;
-	dword			pl_length;
-	bool			pl_shuffle;
-	bool			pl_repeat;
+	dword		au_volume;
+	dword		au_pan;
+	dword		pl_position;
+	dword		pl_length;
+	bool		pl_shuffle;
+	bool		pl_repeat;
 
 	// current song
-	dword			sn_length;
-	dword			sn_pos;
+	dword		sn_length;
+	dword		sn_pos;
 */
 
 public:
 	// constructor / destructor
-	NGWINAMP(HWND hwndplugin);
+	NGWINAMP(HINSTANCE hinstance, HWND hwndplugin);
 	virtual ~NGWINAMP();
 
 
+	string getwinampdirectory(void) const;
+	string getplugindirectory(void) const;
+	string getpluginfilename(void) const;
 	HWND   getwinampwnd(void) const;
 	HWND   getplaylistwnd(void) const;
 	word   getmajorversion(void) const;
 	word   getminorversion(void) const;
 
 	// basic controls
-	bool   isplaying(void);
-	bool   ispaused(void);
-	void   prev(void);
-	void   play(void);
-	void   pause(void);
-	void   stop(void);
-	void   next(void);
+	bool   sn_isplaying(void);
+	bool   sn_ispaused(void);
+	void   sn_prev(void);
+	void   sn_play(void);
+	void   sn_pause(void);
+	void   sn_stop(void);
+	void   sn_next(void);
 
 	// sound controls
 	double sn_getvolume(void);

@@ -275,6 +275,253 @@ public:
 
 
 /**
+ * Buffer reader
+ *
+ */
+class NGREADER {
+protected:
+	NGBUFFER	buffer;
+	dword		offset;
+	dword		error;
+
+public:
+	NGREADER(const NGBUFFER &buffer) : buffer(buffer), offset(0), error(0) {
+	}
+
+	bool isError(void) const {
+		return (this->error > 0);
+	}
+
+	bool readBool(void) {
+		byte value = 0;
+
+		if (!this->isError()) {
+			if (this->buffer.read(&value, this->offset, sizeof(byte)) == sizeof(byte)) {
+				this->offset += sizeof(byte);
+			} else {
+				this->error++;
+			}
+		}
+		return (value != 0x00);
+	}
+
+	byte readByte(void) {
+		byte value = 0;
+
+		if (!this->isError()) {
+			if (this->buffer.read(&value, this->offset, sizeof(byte)) == sizeof(byte)) {
+				this->offset += sizeof(byte);
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	word readWord(void) {
+		word value = 0;
+
+		if (!this->isError()) {
+			if (this->buffer.read(&value, this->offset, sizeof(word)) == sizeof(word)) {
+				this->offset += sizeof(word);
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	dword readDword(void) {
+		dword value = 0;
+
+		if (!this->isError()) {
+			if (this->buffer.read(&value, this->offset, sizeof(dword)) == sizeof(dword)) {
+				this->offset += sizeof(dword);
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	float readFloat(void) {
+		float value = 0;
+
+		if (!this->isError()) {
+			if (this->buffer.read(&value, this->offset, sizeof(float)) == sizeof(float)) {
+				this->offset += sizeof(float);
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	double readDouble(void) {
+		double value = 0;
+
+		if (!this->isError()) {
+			if (this->buffer.read(&value, this->offset, sizeof(double)) == sizeof(double)) {
+				this->offset += sizeof(double);
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	string readByteString(void) {
+		string value;
+
+		if (!this->isError()) {
+			byte length = this->readByte();
+
+			value = this->buffer.tostring(this->offset, length);
+			if (value.length() == length) {
+				this->offset += length;
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	string readWordString(void) {
+		string value;
+
+		if (!this->isError()) {
+			word length = this->readWord();
+
+			value = this->buffer.tostring(this->offset, length);
+			if (value.length() == length) {
+				this->offset += length;
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	string readDwordString(void) {
+		string value;
+
+		if (!this->isError()) {
+			dword length = this->readDword();
+
+			value = this->buffer.tostring(this->offset, length);
+			if (value.length() == length) {
+				this->offset += length;
+			} else {
+				this->error++;
+			}
+		}
+		return value;
+	}
+
+	void read(void *ptr, const dword size) {
+		if (!this->isError()) {
+			if (this->buffer.read(ptr, this->offset, size) == size) {
+				this->offset += size;
+			} else {
+				this->error++;
+			}
+		}
+	}
+
+	void skip(const dword size) {
+		if (!this->isError()) {
+			if ((this->offset + size) <= this->buffer.size()) {
+				this->offset += size;
+			} else {
+				this->error++;
+			}
+		}
+	}
+};
+
+
+/**
+ * Buffer writer
+ *
+ */
+class NGWRITER {
+protected:
+	NGBUFFER buffer;
+
+public:
+	NGWRITER() {
+	}
+
+	operator const NGBUFFER &(void) const {
+		return this->buffer;
+	}
+
+	dword getsize(void) const {
+		return buffer.size();
+	}
+
+	void writeBool(const bool value) {
+		byte raw;
+
+		if (value) {
+			raw = 0xFF;
+		} else {
+			raw = 0x00;
+		}
+		this->buffer.append(&raw, sizeof(byte));
+	}
+
+	void writeByte(const byte value) {
+		this->buffer.append(&value, sizeof(byte));
+	}
+
+	void writeWord(const word value) {
+		this->buffer.append(&value, sizeof(word));
+	}
+
+	void writeDword(const dword value) {
+		this->buffer.append(&value, sizeof(dword));
+	}
+
+	void writeFloat(const float value) {
+		this->buffer.append(&value, sizeof(float));
+	}
+
+	void writeDouble(const double value) {
+		this->buffer.append(&value, sizeof(double));
+	}
+
+	void writeByteString(const string &value) {
+		string final = value.length() > 0xFF ? value.substr(0, 0xFF) : value;
+		byte length = (byte)final.length();
+
+		this->buffer.append(&length, sizeof(byte));
+		this->buffer.append(final.c_str(), length);
+	}
+
+	void writeWordString(const string &value) {
+		string final = value.length() > 0xFFFF ? value.substr(0, 0xFFFF) : value;
+		word length = (word)final.length();
+
+		this->buffer.append(&length, sizeof(word));
+		this->buffer.append(final.c_str(), length);
+	}
+
+	void writeDwordString(const string &value) {
+		dword length = value.length();
+
+		this->buffer.append(&length, sizeof(dword));
+		this->buffer.append(value.c_str(), length);
+	}
+
+	void write(const void *ptr, const dword size) {
+		this->buffer.append(ptr, size);
+	}
+};
+
+
+
+/**
   * String utilities
   *
   */
@@ -290,6 +537,8 @@ vector<string> strsplit(const string &value, const string &separator, dword limi
   */
 vector<string> getdirectoryitems(const string &filename, const vector<string> &exts);
 string pathappendslash(const string &filename);
+string pathgetdirectory(const string &filename);
+dword pathgetsize(const string &filename);
 bool pathexists(const string &filename);
 bool pathcompare(const string &src1, const string &src2);
 bool pathisurl(const string &filename);

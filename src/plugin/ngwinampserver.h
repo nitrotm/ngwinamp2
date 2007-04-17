@@ -62,7 +62,7 @@ protected:
 
 
 public:
-	NGWINAMPSERVER(HWND hwndplugin);
+	NGWINAMPSERVER(HINSTANCE hinstance, HWND hwndplugin);
 	virtual ~NGWINAMPSERVER();
 
 	bool isrunning(void);

@@ -175,12 +175,12 @@ BEGIN
                     WS_TABSTOP,319,57,50,8
     CONTROL         "",IDC_VOLUME,"msctls_trackbar32",TBS_AUTOTICKS | 
                     WS_TABSTOP,50,66,200,10
-    EDITTEXT        IDC_VOLUME_VALUE,252,66,30,10,ES_AUTOHSCROLL | NOT 
-                    WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_VOLUME_VALUE,252,66,30,10,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER,WS_EX_STATICEDGE
     CONTROL         "",IDC_PAN,"msctls_trackbar32",TBS_AUTOTICKS | 
                     WS_TABSTOP,50,77,200,10
-    EDITTEXT        IDC_PAN_VALUE,252,77,30,10,ES_AUTOHSCROLL | NOT 
-                    WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_PAN_VALUE,252,77,30,10,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER,WS_EX_STATICEDGE
     EDITTEXT        IDC_SONG_TITLE,14,27,372,10,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER,WS_EX_STATICEDGE
     CONTROL         "",IDC_SONG_PROGRESS,"msctls_trackbar32",TBS_AUTOTICKS | 
@@ -192,7 +192,7 @@ BEGIN
     RTEXT           "Pan :",IDC_STATIC,14,77,33,8
     RTEXT           "NGWinamp 2.0.0(beta)",IDC_STATIC,286,68,100,8,
                     WS_DISABLED
-    RTEXT           "(c) 2006 - nitro.tm@gmail.com",IDC_STATIC,286,77,100,8,
+    RTEXT           "(c) 2007 - nitro.tm@gmail.com",IDC_STATIC,286,77,100,8,
                     WS_DISABLED
 END
 
@@ -259,7 +259,7 @@ BEGIN
     POPUP "Connection"
     BEGIN
         MENUITEM "Connect",                     IDM_CONNECT
-        MENUITEM "Disconnect",                  IDM_DISCONNECT
+        MENUITEM "Disconnect",                  IDM_DISCONNECT, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "Exit",                        IDM_EXIT
     END
@@ -278,7 +278,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Clear",                       IDM_CLEAR, GRAYED
         MENUITEM "Rem. dead",                   IDM_REMOVE_DEAD, GRAYED
-        MENUITEM "Sort",                        IDM_SORT, GRAYED
+        MENUITEM "Sort by name",                IDM_SORTBYNAME, GRAYED
+        MENUITEM "Sort by path",                IDM_SORTBYPATH, GRAYED
         MENUITEM "Randomize",                   IDM_RANDOMIZE, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "Refresh",                     IDM_REFRESH, GRAYED

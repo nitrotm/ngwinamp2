@@ -9,7 +9,7 @@
 #include "ngwinampcon.h"
 
 
-NGWINAMPCON::NGWINAMPCON(SOCKET s, const SOCKADDR_IN &address, double timeout) : NGLOCK(), s(s), timeout(timeout), defaultflags(0), eof(false) {
+NGWINAMPCON::NGWINAMPCON(SOCKET s, const SOCKADDR_IN &address, double timeout) : NGLOCK(), s(s), timeout(timeout), defaultflags(0), eof(false), byte_in(0), byte_out(0) {
 	dword enabled = 1;
 
 	ioctlsocket(s, FIONBIO, &enabled);
@@ -36,6 +36,35 @@ void NGWINAMPCON::setflags(dword flags) {
 	NGLOCKER locker(this);
 
 	this->defaultflags = flags;
+}
+
+void NGWINAMPCON::setsnapshot(double inverval) {
+	NGLOCKER locker(this);
+
+	this->snapshotinverval = inverval;
+	this->lastsnapshot.start();
+}
+
+bool NGWINAMPCON::checksnapshot(void) {
+	NGLOCKER locker(this);
+
+	// check snapshot
+	if (this->snapshotinverval > 0.0 && this->lastsnapshot.pick() >= this->snapshotinverval) {
+		this->lastsnapshot.start();
+		return true;
+	}
+	return false;
+}
+
+dword NGWINAMPCON::getbytein(void) {
+	NGLOCKER locker(this);
+
+	return this->byte_in;
+}
+dword NGWINAMPCON::getbyteout(void) {
+	NGLOCKER locker(this);
+
+	return this->byte_out;
 }
 
 
@@ -72,6 +101,7 @@ void NGWINAMPCON::shutdown(void) {
 
 
 bool NGWINAMPCON::main(void) {
+	// check messages
 	if (this->recvmsg()) {
 		return this->sendmsg();
 	}
@@ -105,10 +135,17 @@ bool NGWINAMPCON::recvmsg(void) {
 
 		if (len > 0) {
 			if (!this->eof) {
+				this->byte_in += len;
 				this->recvbuffer.append(buffer, len);
 			}
 		} else {
-			if (WSAGetLastError() != WSAEWOULDBLOCK) {
+			int error = WSAGetLastError();
+
+			switch (error) {
+			case WSAEWOULDBLOCK:
+				break;
+
+			default:
 				this->close();
 				return false;
 			}
@@ -149,6 +186,7 @@ bool NGWINAMPCON::sendmsg(void) {
 		if (len > 0) {
 			this->timer.start();
 			this->sendbuffer.erase(0, len);
+			this->byte_out += len;
 		}
 	} else {
 		if (this->eof) {

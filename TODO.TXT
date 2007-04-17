@@ -6,13 +6,11 @@ NGWinamp Developpement Roadmap
 - (todo) add fs stats (and import/export) -> play count, vote count, ...
 - (todo) voting system -> add to list ordered by bigger vote count
 - (todo) get most played songs request
-- (todo) get directories request
 - (todo) get file list by range request
 - (todo) get winamp infos request (stop,play,pause,version,...)
 - (todo) get current song infos request (sample, bitrate, channel)
 - (todo) get/set current EQ values request
 - (todo) restart winamp request
-- (todo) auto change notifications to client
 - (todo) add configuration dialog (with server restart)
 - (todo) plugin support (extends request/response, interact with winamp interface)
 
@@ -28,10 +26,8 @@ Some technical details about future developpement :
 v2.0.x
 ------
 - [feature]   extended informations for files in playlist (length, rate, channels, tags...)
-- [graphical] tree-view browser with cache, more friendly, last path memory...
 - [graphical] favorite paths in browser interface
-- [graphical] client interfaces fully resizable
-- [graphical] a lots of improvements, eventually skin's support
+- [graphical] eventually skin's support
 
 
 v2.x

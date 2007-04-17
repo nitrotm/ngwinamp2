@@ -18,7 +18,7 @@
 int WINAPI NGWINAMPSERVER_thread(NGWINAMPSERVER *pserver);
 
 
-NGWINAMPSERVER::NGWINAMPSERVER(HWND hwndplugin) : NGWINAMP(hwndplugin), hthread(NULL), swait(INVALID_SOCKET), shares(NULL, "", vector<string>()) {
+NGWINAMPSERVER::NGWINAMPSERVER(HINSTANCE hinstance, HWND hwndplugin) : NGWINAMP(hinstance, hwndplugin), hthread(NULL), swait(INVALID_SOCKET), shares(NULL, "", vector<string>()) {
 	this->hrunning = CreateEvent(NULL, TRUE, FALSE, NULL);
 	this->hquit = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
@@ -194,7 +194,7 @@ void NGWINAMPSERVER::appendshare(FSRoot *parent, const CFGNode &share) {
 			}
 		} else if (share.exists("url")) {
 			if (pathisurl(share.getchild("url").getstr())) {
-				pnode = new FSRoot(parent, share.getname(), usernames, share.getchild("url").getstr());
+				pnode = new FSURLRoot(parent, share.getname(), usernames, share.getchild("url").getstr());
 				parent->add(pnode);
 
 				DEBUGWRITE("Internet share " + share.getname() + " at " + pnode->getfullname());
@@ -222,7 +222,27 @@ bool NGWINAMPSERVER::init(void) {
 	// init data
 	ResetEvent(this->hquit);
 	SetEvent(this->hrunning);
-	this->readcfg("c:\\ngwinamp.cfg");
+
+	// read and check configuration
+	this->readcfg(this->getplugindirectory() + "\\gen_ngwinamp.cfg");
+	if (!this->cfg_enabled) {
+		DEBUGWRITE("NGWINAMPSERVER::init() disabled by configuration !");
+		return false;
+	}
+	if (this->cfg_connection == 0) {
+		DEBUGWRITE("NGWINAMPSERVER::init() invalid configuration, connection = 0 !");
+		return false;
+	}
+	if (this->cfg_buffersize == 0) {
+		DEBUGWRITE("NGWINAMPSERVER::init() invalid configuration, buffersize = 0 !");
+		return false;
+	}
+	if (this->cfg_port == 0) {
+		DEBUGWRITE("NGWINAMPSERVER::init() invalid configuration, port = 0 !");
+		return false;
+	}
+
+	// preload shares
 	this->shares.refresh(true);
 	this->sharetimer.start();
 
@@ -304,13 +324,15 @@ void NGWINAMPSERVER::free(void) {
 
 void NGWINAMPSERVER::main(void) {
 	NGLOCKER locker(this);
+	dword    totalcon = 0;
 
-	// check for incoming connections
-	this->accept();
+	// remove closed connections
+	this->gc();
 
 	// check authorized connections
 	for (dword i = 0; i < this->users.size(); i++) {
 		this->users[i]->main();
+		totalcon += this->users[i]->getcurcon();
 	}
 
 	// allow/deny new connections
@@ -319,6 +341,7 @@ void NGWINAMPSERVER::main(void) {
 			NETDATA *prequest = this->connections[i]->request();
 
 			if (prequest != NULL) {
+				prequest->uncompress();
 				if (this->authenticate(this->connections[i], prequest)) {
 					this->connections.erase(this->connections.begin() + i);
 				} else {
@@ -328,9 +351,12 @@ void NGWINAMPSERVER::main(void) {
 			}
 		}
 	}
+	totalcon += this->connections.size();
 
-	// remove closed connections
-	this->gc();
+	// check for incoming connections
+	if (totalcon < this->cfg_connection) {
+		this->accept();
+	}
 
 	// refresh shares
 	if (this->cfg_sharerefresh > 0.0 && this->sharetimer.pick() > this->cfg_sharerefresh) {
@@ -365,12 +391,10 @@ void NGWINAMPSERVER::accept(void) {
 void NGWINAMPSERVER::gc(void) {
 	NGLOCKER locker(this);
 
-	for (dword i = 0; i < this->connections.size(); i++) {
+	for (long i = (this->connections.size() - 1); i >= 0; i--) {
 		if (this->connections[i]->isclosed()) {
 			delete this->connections[i];
 			this->connections.erase(this->connections.begin() + i);
-			this->gc();
-			break;
 		}
 	}
 }
@@ -447,6 +471,7 @@ NGWINAMPUSER* NGWINAMPSERVER::finduser(const string &username) {
 
 bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 	NGLOCKER	 locker(this);
+	NGREADER	 reader(prequest->buffer);
 	NGWINAMPUSER *puser;
 	string		 username, password;
 	dword		 code = NGWINAMP_AUTH_NOTDONE;
@@ -469,16 +494,11 @@ bool NGWINAMPSERVER::authenticate(NGWINAMPCON *pconnection, NETDATA *prequest) {
 		}
 	} else if (prequest->hdr.code == NGWINAMP_REQ_AUTH_EX) {
 		// read username & password
-		word offset, length;
-
-		if (prequest->buffer.read(&length, 0, 2) == 2) {
-			offset = 2;
-			username = prequest->buffer.tostring(offset, length);
-			offset += length;
-			if (prequest->buffer.read(&length, offset, 2) == 2) {
-				offset += 2;
-				password = prequest->buffer.tostring(offset, length);
-			}
+		username = reader.readWordString();
+		password = reader.readWordString();
+		if (reader.isError()) {
+			username.clear();
+			password.clear();
 		}
 	}
 	if (username.length() > 0) {

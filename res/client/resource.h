@@ -29,14 +29,11 @@
 #define IDC_VOLUME_VALUE                1020
 #define IDC_PAN_VALUE                   1021
 #define IDC_SONG_POSITION               1022
-#define IDC_VOLUME2                     1023
 #define IDM_EXIT                        40008
 #define IDM_DISCONNECT                  40009
 #define IDM_CONNECT                     40010
 #define IDM_HELP                        40011
 #define IDM_ABOUT                       40012
-#define IDM_PLAYLIST                    40015
-#define ID_SOUND                        40016
 #define IDM_BACK                        40029
 #define IDM_PLAY                        40030
 #define IDM_PAUSE                       40031
@@ -46,16 +43,17 @@
 #define IDM_SHUFFLE                     40036
 #define IDM_CLEAR                       40037
 #define IDM_REMOVE_DEAD                 40038
-#define IDM_SORT                        40039
 #define IDM_RANDOMIZE                   40040
 #define IDM_REFRESH                     40041
+#define IDM_SORTBYPATH                  40043
+#define IDM_SORTBYNAME                  40044
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        106
-#define _APS_NEXT_COMMAND_VALUE         40042
+#define _APS_NEXT_COMMAND_VALUE         40045
 #define _APS_NEXT_CONTROL_VALUE         1023
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

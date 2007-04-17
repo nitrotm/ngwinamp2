@@ -80,7 +80,7 @@ public:
 // note: compatibility
 //		if ((this->hdr.flags & NGWINAMP_FILTER_ALLOWZZIP) != 0) {
 			if ((this->hdr.flags & NGWINAMP_FILTER_ZZIP) != 0) {
-				dword size = this->buffer.size() + 32;
+				dword size = this->hdr.size2 + 32;
 				byte  *tmp = new byte[size];
 				int   code;
 

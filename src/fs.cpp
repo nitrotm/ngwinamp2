@@ -19,6 +19,9 @@ bool FSNode::isroot(void) const {
 bool FSNode::isfile(void) const {
 	return ((this->type & FS_TYPE_FILE) != 0);
 }
+bool FSNode::isurl(void) const {
+	return false;
+}
 bool FSNode::isdirectory(void) const {
 	return ((this->type & FS_TYPE_DIRECTORY) != 0);
 }
@@ -32,6 +35,9 @@ dword FSNode::gettype(void) const {
 	return this->type;
 }
 dword FSNode::getsize(void) const {
+	if (this->isfile()) {
+		return pathgetsize(this->path);
+	}
 	return this->size;
 }
 const string& FSNode::getname(void) const {
@@ -63,12 +69,28 @@ void FSNode::mergeusers(const vector<string> &users) {
 		this->parent->mergeusers(users);
 	}
 }
+dword FSNode::getsubdirectorycount(const string &user) const {
+	dword count = 0;
+
+	if (this->hasaccess(user)) {
+		for (dword i = 0; i < this->children.size(); i++) {
+			if (!this->children[i]->isurl() && this->children[i]->isroot()) {
+				if (this->children[i]->hasaccess(user)) {
+					count++;
+				}
+			} else if (this->children[i]->isdirectory()) {
+				count++;
+			}
+		}
+	}
+	return count;
+}
 vector<string> FSNode::listdirectories(const string &user) const {
 	vector<string> items;
 
 	if (this->hasaccess(user)) {
 		for (dword i = 0; i < this->children.size(); i++) {
-			if (this->children[i]->isroot()) {
+			if (!this->children[i]->isurl() && this->children[i]->isroot()) {
 				if (this->children[i]->hasaccess(user)) {
 					items.push_back(this->children[i]->name);
 				}
@@ -313,6 +335,7 @@ void FSRoot::refresh(bool force, FSNode *node) {
 						FSNode *child = new FSNode(node, items[i], childpath);
 
 						if (child->lookup()) {
+							this->refresh(force, child);
 							node->children.push_back(child);
 						} else {
 							delete child;
@@ -337,4 +360,14 @@ void FSRoot::refresh(bool force, FSNode *node) {
 void FSRoot::refresh(bool force) {
 	this->lookup();
 	this->refresh(force, this);
+}
+
+
+FSURLRoot::FSURLRoot(FSNode *parent, const string &name, const vector<string> &users, const string &path) : FSRoot(parent, name, users, path) {
+}
+FSURLRoot::~FSURLRoot() {
+}
+
+bool FSURLRoot::isurl(void) const {
+	return true;
 }

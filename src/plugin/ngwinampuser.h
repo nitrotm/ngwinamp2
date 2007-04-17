@@ -35,6 +35,7 @@ protected:
 	void   main(void);
 	void   gc(void);
 	bool   process(NGWINAMPCON *pconnection, NETDATA *prequest);
+	bool   sendsnapshot(NGWINAMPCON *pconnection);
 
 	dword  authenticate(const string &password, const SOCKADDR_IN &address);
 
@@ -53,12 +54,16 @@ public:
 	string getusername(void);
 	string getpassword(void);
 	dword  getaccess(void);
+	dword  getcurcon(void);
 	dword  getmaxcon(void);
 	double gettimeout(void);
 	bool   hasaccess(dword what);
 	bool   canread(void);
 	bool   canwrite(void);
 	bool   canadmin(void);
+
+	dword  getbytein(void);
+	dword  getbyteout(void);
 };
 
 

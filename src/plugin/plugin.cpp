@@ -45,7 +45,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstance, ULONG reason, LPVOID reserved) {
 int init(void) {
 	hInstance = winamp.hDllInstance;
 	if (pwinamp == NULL) {
-		pwinamp = new NGWINAMPSERVER(winamp.hwndParent);
+		pwinamp = new NGWINAMPSERVER(winamp.hDllInstance, winamp.hwndParent);
 	}
 	if (pwinamp != NULL) {
 		((NGWINAMPSERVER*)pwinamp)->start();

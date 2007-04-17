@@ -111,7 +111,6 @@ void NGWINAMPUSER::allow(const NETADDR &addr) {
 	this->allowed.push_back(addr);
 }
 
-
 string NGWINAMPUSER::getusername(void) {
 	NGLOCKER locker(this);
 
@@ -126,6 +125,11 @@ dword NGWINAMPUSER::getaccess(void) {
 	NGLOCKER locker(this);
 
 	return this->access;
+}
+dword NGWINAMPUSER::getcurcon(void) {
+	NGLOCKER locker(this);
+
+	return this->connections.size();
 }
 dword NGWINAMPUSER::getmaxcon(void) {
 	NGLOCKER locker(this);
@@ -158,6 +162,17 @@ bool NGWINAMPUSER::canadmin(void) {
 	return this->hasaccess(NGWINAMPUSER_ACCESS_ADMIN);
 }
 
+dword NGWINAMPUSER::getbytein(void) {
+	NGLOCKER locker(this);
+
+	return this->byte_in;
+}
+dword NGWINAMPUSER::getbyteout(void) {
+	NGLOCKER locker(this);
+
+	return this->byte_out;
+}
+
 
 bool NGWINAMPUSER::exists(NGWINAMPCON *pconnection) {
 	NGLOCKER locker(this);
@@ -187,10 +202,17 @@ void NGWINAMPUSER::main(void) {
 			NETDATA *prequest = this->connections[i]->request();
 
 			if (prequest != NULL) {
+				prequest->uncompress();
 				if (!this->process(this->connections[i], prequest)) {
 					this->connections[i]->shutdown();
 				}
 				delete prequest;
+			} else {
+				if (this->connections[i]->checksnapshot()) {
+					if (!this->sendsnapshot(this->connections[i])){
+						this->connections[i]->shutdown();
+					}
+				}
 			}
 		}
 	}
@@ -200,19 +222,27 @@ void NGWINAMPUSER::main(void) {
 void NGWINAMPUSER::gc(void) {
 	NGLOCKER locker(this);
 
-	for (dword i = 0; i < this->connections.size(); i++) {
+	for (long i = this->connections.size() - 1; i >= 0; i--) {
 		if (this->connections[i]->isclosed()) {
+			this->byte_in += this->connections[i]->getbytein();
+			this->byte_out += this->connections[i]->getbyteout();
+
+#ifdef _DEBUG
+			char tmp[512];
+			sprintf(tmp, "NGWINAMPUSER::gc() user %s connection closed (in: %u / %u [b], out: %u / %u [b])", this->username.c_str(), this->connections[i]->getbytein(), this->byte_in, this->connections[i]->getbyteout(), this->byte_out);
+			DEBUGWRITE(tmp);
+#endif
+
 			delete this->connections[i];
 			this->connections.erase(this->connections.begin() + i);
-			this->gc();
-			break;
 		}
 	}
 }
 
 bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 	NGLOCKER locker(this);
-	NGBUFFER buffer;
+	NGREADER reader(prequest->buffer);
+	NGWRITER writer;
 
 #ifdef _DEBUG
 	char tmp[512];
@@ -249,26 +279,18 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 
 				if (prequest->hdr.param1 == NGWINAMP_ALL) {
 					for (dword i = 0; i < total; i++) {
-						string value = this->pserver->pl_getname(i);
-						word   length = (word)value.length();
-
-						buffer.append(&i, 4);
-						buffer.append(&length, 2);
-						buffer.append(value.c_str(), length);
+						writer.writeDword(i);
+						writer.writeWordString(this->pserver->pl_getname(i));
 					}
 					count = total;
 				} else {
 					if (prequest->hdr.param1 < total) {
-						string value = this->pserver->pl_getname(prequest->hdr.param1);
-						word   length = (word)value.length();
-
-						buffer.append(&prequest->hdr.param1, 4);
-						buffer.append(&length, 2);
-						buffer.append(value.c_str(), length);
+						writer.writeDword(prequest->hdr.param1);
+						writer.writeWordString(this->pserver->pl_getname(prequest->hdr.param1));
 						count = 1;
 					}
 				}
-				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_PLNAMES, count, total, 0, 0.0, buffer))) {
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_PLNAMES, count, total, 0, 0.0, writer))) {
 					return false;
 				}
 			}
@@ -280,26 +302,18 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 
 				if (prequest->hdr.param1 == NGWINAMP_ALL) {
 					for (dword i = 0; i < total; i++) {
-						string value = this->pserver->pl_getfilename(i);
-						word   length = (word)value.length();
-
-						buffer.append(&i, 4);
-						buffer.append(&length, 2);
-						buffer.append(value.c_str(), length);
+						writer.writeDword(i);
+						writer.writeWordString(this->pserver->pl_getfilename(i));
 					}
 					count = total;
 				} else {
 					if (prequest->hdr.param1 < total) {
-						string value = this->pserver->pl_getfilename(prequest->hdr.param1);
-						word   length = (word)value.length();
-
-						buffer.append(&prequest->hdr.param1, 4);
-						buffer.append(&length, 2);
-						buffer.append(value.c_str(), length);
+						writer.writeDword(prequest->hdr.param1);
+						writer.writeWordString(this->pserver->pl_getfilename(prequest->hdr.param1));
 						count = 1;
 					}
 				}
-				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_PLFILES, count, total, 0, 0.0, buffer))) {
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_PLFILES, count, total, 0, 0.0, writer))) {
 					return false;
 				}
 			}
@@ -326,11 +340,8 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 
 		case NGWINAMP_REQ_BWGETROOTS: // note: obsolete
 			{
-				word  length = 1;
-
-				buffer.append(&length, 2);
-				buffer.append("/", 1);
-				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWROOTS, 1, 0, 0, 0.0, buffer))) {
+				writer.writeWordString("/");
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWROOTS, 1, 0, 0, 0.0, writer))) {
 					return false;
 				}
 			}
@@ -341,7 +352,7 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 				vector<string>	files;
 				string			path = prequest->buffer.tostring();
 
-				strreplace(path, '\\', '/');
+				path = strreplace(path, '\\', '/');
 				if (path.length() > 0) {
 					const FSNode *pnode = this->pserver->findshare(path);
 
@@ -351,18 +362,12 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 					}
 				}
 				for (dword i = 0; i < dirs.size(); i++) {
-					word   length = (word)dirs[i].length();
-
-					buffer.append(&length, 2);
-					buffer.append(dirs[i].c_str(), length);
+					writer.writeWordString(dirs[i]);
 				}
 				for (dword i = 0; i < files.size(); i++) {
-					word   length = (word)files[i].length();
-
-					buffer.append(&length, 2);
-					buffer.append(files[i].c_str(), length);
+					writer.writeWordString(files[i]);
 				}
-				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWLIST, dirs.size(), files.size(), 0, 0.0, buffer))) {
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWLIST, dirs.size(), files.size(), 0, 0.0, writer))) {
 					return false;
 				}
 			}
@@ -421,47 +426,109 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			return true;
 
 		case NGWINAMP_REQ_BWGETDIRECTORIES:
-			// note: TODO
+			{
+				vector<FSNode*>	dirs;
+				const FSNode	*pnode;
+				string			path;
+
+				path = reader.readWordString();
+				if (reader.isError()) {
+					return false;
+				}
+				if (path.length() == 0) {
+					path += "/";
+				} else if (path[path.length() - 1] != '/') {
+					path += "/";
+				}
+				pnode = this->pserver->findshare(path);
+				if (pnode != NULL) {
+					vector<string> names = pnode->listdirectories(this->username);
+
+					for (dword i = 0; i < names.size(); i++) {
+						dirs.push_back(pnode->get(names[i]));
+					}
+				}
+				writer.writeWordString(path);
+				for (dword i = 0; i < dirs.size(); i++) {
+					writer.writeDword(dirs[i]->gettype());
+					writer.writeDword(dirs[i]->getsubdirectorycount(this->username));
+					writer.writeWordString(dirs[i]->getname());
+				}
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWDIRECTORIES, dirs.size(), 0, 0, 0.0, writer))) {
+					return false;
+				}
+			}
 			return true;
 
 		case NGWINAMP_REQ_BWGETFILES:
-			// note: TODO
+			{
+				vector<FSNode*>	files;
+				const FSNode	*pnode;
+				string			path;
+
+				path = reader.readWordString();
+				if (reader.isError()) {
+					return false;
+				}
+				if (path.length() == 0) {
+					path += "/";
+				} else if (path[path.length() - 1] != '/') {
+					path += "/";
+				}
+				pnode = this->pserver->findshare(path);
+				if (pnode != NULL) {
+					vector<string> names = pnode->listfiles(this->username);
+
+					for (dword i = 0; i < names.size(); i++) {
+						files.push_back(pnode->get(names[i]));
+					}
+				}
+				writer.writeWordString(path);
+				for (dword i = 0; i < files.size(); i++) {
+					writer.writeDword(files[i]->gettype());
+					writer.writeDword(files[i]->getsize());
+					writer.writeWordString(files[i]->getname());
+				}
+				if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_BWFILES, files.size(), 0, 0, 0.0, writer))) {
+					return false;
+				}
+			}
 			return true;
 
 		case NGWINAMP_REQ_GETSNAPSHOT_EX:
-			// note: TODO
-			return true;
+			pconnection->setsnapshot(prequest->hdr.param3);
+			return this->sendsnapshot(pconnection);
 		}
 	}
 	if (this->canwrite()) {
 		switch (prequest->hdr.code) {
 		case NGWINAMP_REQ_PREV:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_BACK)) {
-				this->pserver->prev();
+				this->pserver->sn_prev();
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_PLAY:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_PLAY)) {
-				this->pserver->play();
+				this->pserver->sn_play();
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_PAUSE:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_PAUSE)) {
-				this->pserver->pause();
+				this->pserver->sn_pause();
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_STOP:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_STOP)) {
-				this->pserver->stop();
+				this->pserver->sn_stop();
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_NEXT:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_NEXT)) {
-				this->pserver->next();
+				this->pserver->sn_next();
 				return true;
 			}
 			break;
@@ -469,44 +536,40 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 		case NGWINAMP_REQ_SETVOLUME:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_VOLUME)) {
 				this->pserver->sn_setvolume(prequest->hdr.param3);
+				pconnection->snapshot.sn_volume = this->pserver->sn_getvolume();
+				NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_VOLUME);
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_SETPAN:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_PAN)) {
 				this->pserver->sn_setpan(prequest->hdr.param3);
+				pconnection->snapshot.sn_pan = this->pserver->sn_getpan();
+				NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_PAN);
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_SETPOS:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_SN_POS)) {
 				this->pserver->sn_setpos(prequest->hdr.param3);
+				pconnection->snapshot.sn_posms = this->pserver->sn_getposms();
+				NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_POSMS);
 				return true;
 			}
 			break;
 
 		case NGWINAMP_REQ_PLADDFILES:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_ADD)) {
-				dword offset = 0;
-
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
 					vector<string>	paths;
-					string			filename;
-					dword			index;
-					word			length;
+					dword			index = reader.readDword();
+					string			filename = reader.readWordString();
 
-					if (prequest->buffer.read(&index, offset + 0, 4) != 4 ||
-						prequest->buffer.read(&length, offset + 4, 2) != 2) {
+					if (reader.isError()) {
 						return false;
 					}
-					filename = prequest->buffer.tostring(offset + 6, length);
-					if (filename.length() != length) {
-						return false;
-					}
-					offset += 6 + length;
-
 					paths = this->pserver->getfilepaths(this->username, filename);
-					this->pserver->pl_addfile(paths);
+					this->pserver->pl_insfile(index, paths);
 				}
 				return true;
 			}
@@ -514,18 +577,24 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 		case NGWINAMP_REQ_PLSETPOS:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
 				this->pserver->pl_setpos(prequest->hdr.param1);
+				pconnection->snapshot.pl_pos = this->pserver->pl_getpos();
+				NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_POS);
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_PLSETSHUFFLE:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
 				this->pserver->pl_setshuffle((prequest->hdr.param1 != NGWINAMP_NONE) ? true : false);
+				pconnection->snapshot.pl_shuffle = this->pserver->pl_getshuffle();
+				NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_SHUFFLE);
 				return true;
 			}
 			break;
 		case NGWINAMP_REQ_PLSETREPEAT:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_CTRL)) {
 				this->pserver->pl_setrepeat((prequest->hdr.param1 != NGWINAMP_NONE) ? true : false);
+				pconnection->snapshot.pl_repeat = this->pserver->pl_getrepeat();
+				NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_REPEAT);
 				return true;
 			}
 			break;
@@ -537,24 +606,14 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			break;
 		case NGWINAMP_REQ_PLSETFILES:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_SET)) {
-				dword offset = 0;
-
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
 					vector<string>	paths;
-					string			filename;
-					dword			index;
-					word			length;
+					dword			index = reader.readDword();
+					string			filename = reader.readWordString();
 
-					if (prequest->buffer.read(&index, offset + 0, 4) != 4 ||
-						prequest->buffer.read(&length, offset + 4, 2) != 2) {
+					if (reader.isError()) {
 						return false;
 					}
-					filename = prequest->buffer.tostring(offset + 6, length);
-					if (filename.length() != length) {
-						return false;
-					}
-					offset += 6 + length;
-
 					paths = this->pserver->getfilepaths(this->username, filename);
 					this->pserver->pl_setfile(index, paths);
 				}
@@ -563,17 +622,13 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			break;
 		case NGWINAMP_REQ_PLDELFILES:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_DEL)) {
-				vector<dword>	items;
-				dword			offset = 0;
+				vector<dword> items;
 
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
-					dword index;
-
-					if (prequest->buffer.read(&index, offset + 0, 4) != 4) {
+					items.push_back(reader.readDword());
+					if (reader.isError()) {
 						return false;
 					}
-					offset += 4;
-					items.push_back(index);
 				}
 				sort(items.begin(), items.end());
 				reverse(items.begin(), items.end());
@@ -583,16 +638,13 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 			break;
 		case NGWINAMP_REQ_PLMOVEFILES:
 			if (this->hasaccess(NGWINAMPUSER_ACCESS_PL_SET)) {
-				dword offset = 0;
-
 				for (dword i = 0; i < prequest->hdr.param1; i++) {
-					dword  index1, index2;
+					dword index1 = reader.readDword();
+					dword index2 = reader.readDword();
 
-					if (prequest->buffer.read(&index1, offset + 0, 4) != 4 ||
-						prequest->buffer.read(&index2, offset + 4, 2) != 4) {
+					if (reader.isError()) {
 						return false;
 					}
-					offset += 8;
 					this->pserver->pl_swapfile(index1, index2);
 				}
 				return true;
@@ -676,6 +728,80 @@ bool NGWINAMPUSER::process(NGWINAMPCON *pconnection, NETDATA *prequest) {
 	return false;
 }
 
+bool NGWINAMPUSER::sendsnapshot(NGWINAMPCON *pconnection) {
+	NGLOCKER locker(this);
+	NGWRITER writer;
+
+	if (this->canread()) {
+		dword count = 0;
+
+		NGWINAMP_SNAPSHOT_SN_SETVOLUME(pconnection, this->pserver->sn_getvolume());
+		if (NGWINAMP_SNAPSHOT_HASFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_VOLUME)) {
+			writer.writeDword(NGWINAMP_SNAPSHOT_SN_VOLUME);
+			writer.writeDword(sizeof(double));
+			writer.writeDouble(this->pserver->sn_getvolume());
+			NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_VOLUME);
+			count++;
+		}
+
+		NGWINAMP_SNAPSHOT_SN_SETPAN(pconnection, this->pserver->sn_getpan());
+		if (NGWINAMP_SNAPSHOT_HASFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_PAN)) {
+			writer.writeDword(NGWINAMP_SNAPSHOT_SN_PAN);
+			writer.writeDword(sizeof(double));
+			writer.writeDouble(this->pserver->sn_getpan());
+			NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_PAN);
+			count++;
+		}
+
+		NGWINAMP_SNAPSHOT_SN_SETPOSMS(pconnection, this->pserver->sn_getposms());
+		NGWINAMP_SNAPSHOT_SN_SETLENGTH(pconnection, this->pserver->sn_getlength());
+		if (NGWINAMP_SNAPSHOT_HASFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_POSMS | NGWINAMP_SNAPSHOT_SN_LENGTH)) {
+			writer.writeDword(NGWINAMP_SNAPSHOT_SN_POSMS | NGWINAMP_SNAPSHOT_SN_LENGTH);
+			writer.writeDword(sizeof(dword) * 2);
+			writer.writeDword(this->pserver->sn_getposms());
+			writer.writeDword(this->pserver->sn_getlength());
+			NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_SN_POSMS | NGWINAMP_SNAPSHOT_SN_LENGTH);
+			count++;
+		}
+
+		NGWINAMP_SNAPSHOT_PL_SETPOS(pconnection, this->pserver->pl_getpos());
+		NGWINAMP_SNAPSHOT_PL_SETLENGTH(pconnection, this->pserver->pl_getlength());
+		if (NGWINAMP_SNAPSHOT_HASFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_POS | NGWINAMP_SNAPSHOT_PL_LENGTH)) {
+			writer.writeDword(NGWINAMP_SNAPSHOT_PL_POS | NGWINAMP_SNAPSHOT_PL_LENGTH);
+			writer.writeDword(sizeof(dword) * 2);
+			writer.writeDword(this->pserver->pl_getpos());
+			writer.writeDword(this->pserver->pl_getlength());
+			NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_POS | NGWINAMP_SNAPSHOT_PL_LENGTH);
+			count++;
+		}
+
+		NGWINAMP_SNAPSHOT_PL_SETSHUFFLE(pconnection, this->pserver->pl_getshuffle());
+		if (NGWINAMP_SNAPSHOT_HASFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_SHUFFLE)) {
+			writer.writeDword(NGWINAMP_SNAPSHOT_PL_SHUFFLE);
+			writer.writeDword(sizeof(byte));
+			writer.writeBool(this->pserver->pl_getshuffle());
+			NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_SHUFFLE);
+			count++;
+		}
+
+		NGWINAMP_SNAPSHOT_PL_SETREPEAT(pconnection, this->pserver->pl_getrepeat());
+		if (NGWINAMP_SNAPSHOT_HASFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_REPEAT)) {
+			writer.writeDword(NGWINAMP_SNAPSHOT_PL_REPEAT);
+			writer.writeDword(sizeof(byte));
+			writer.writeBool(this->pserver->pl_getrepeat());
+			NGWINAMP_SNAPSHOT_RESETFLAG(pconnection, NGWINAMP_SNAPSHOT_PL_REPEAT);
+			count++;
+		}
+
+		if (count > 0) {
+			if (!pconnection->answer(new NETDATA(NGWINAMP_ANS_SNAPSHOT_EX, count, 0, 0, 0.0, writer))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
 
 dword NGWINAMPUSER::authenticate(const string &password, const SOCKADDR_IN &address) {
 	NGLOCKER locker(this);

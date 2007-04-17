@@ -11,6 +11,8 @@
  // authentication
 #define NGWINAMP_REQ_AUTH				1 // note: obsolete
 #define NGWINAMP_REQ_AUTH_EX			2
+#define NGWINAMP_REQ_AUTH_TICKET		3 // note: TODO
+#define NGWINAMP_REQ_AUTH_SECURE		4 // note: TODO
  // sound
 #define NGWINAMP_REQ_PREV				11
 #define NGWINAMP_REQ_PLAY				12
@@ -72,6 +74,8 @@
  // authentication
 #define NGWINAMP_ANS_AUTH				1 // note: obsolete
 #define NGWINAMP_ANS_AUTH_EX			2
+#define NGWINAMP_ANS_AUTH_TICKET		3 // note: TODO
+#define NGWINAMP_ANS_AUTH_SECURE		4 // note: TODO
  // sound
 #define NGWINAMP_ANS_VOLUME				21
 #define NGWINAMP_ANS_PAN				23

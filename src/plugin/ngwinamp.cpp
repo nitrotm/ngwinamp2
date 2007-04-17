@@ -7,11 +7,10 @@
 #include "ngwinamp.h"
 
 
-NGWINAMP::NGWINAMP(HWND hwndplugin) : NGLOCK() {
+NGWINAMP::NGWINAMP(HINSTANCE hinstance, HWND hwndplugin) : NGLOCK(), hinstance(hinstance), hplugin(hwndplugin) {
 	int version;
 
 	// initialization
-	this->hplugin = hwndplugin;
 	this->versionmajor = 0;
 	this->versionminor = 0;
 
@@ -36,6 +35,23 @@ NGWINAMP::NGWINAMP(HWND hwndplugin) : NGLOCK() {
 NGWINAMP::~NGWINAMP() {
 }
 
+string NGWINAMP::getwinampdirectory(void) const {
+	return pathgetdirectory(this->getplugindirectory());
+}
+
+string NGWINAMP::getplugindirectory(void) const {
+	return pathgetdirectory(this->getpluginfilename());
+}
+
+string NGWINAMP::getpluginfilename(void) const {
+	char buffer[MAX_PATH + 1];
+
+	if (GetModuleFileName(this->hinstance, buffer, MAX_PATH) != 0) {
+		return buffer;
+	}
+	return "";
+}
+
 HWND NGWINAMP::getwinampwnd(void) const {
 	return this->hwinamp;
 }
@@ -54,7 +70,7 @@ word NGWINAMP::getminorversion(void) const {
 
 
 // basic controls
-bool NGWINAMP::isplaying(void) {
+bool NGWINAMP::sn_isplaying(void) {
 	NGLOCKER lock(this);
 
 	switch (SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)0, (LPARAM)IPC_ISPLAYING)) {
@@ -64,7 +80,7 @@ bool NGWINAMP::isplaying(void) {
 	}
 	return false;
 }
-bool NGWINAMP::ispaused(void) {
+bool NGWINAMP::sn_ispaused(void) {
 	NGLOCKER lock(this);
 
 	if (SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)0, (LPARAM)IPC_ISPLAYING) == 3) {
@@ -72,35 +88,35 @@ bool NGWINAMP::ispaused(void) {
 	}
 	return false;
 }
-void NGWINAMP::prev(void) {
+void NGWINAMP::sn_prev(void) {
 	NGLOCKER lock(this);
 
 	if (this->pl_getlength() > 0) {
 		SendMessage(this->hplugin, WM_COMMAND, MAKEWPARAM(WINAMP_BUTTON1, BN_CLICKED), (LPARAM)0);
 	}
 }
-void NGWINAMP::play(void) {
+void NGWINAMP::sn_play(void) {
 	NGLOCKER lock(this);
 
 	if (this->pl_getlength() > 0) {
 		SendMessage(this->hplugin, WM_COMMAND, MAKEWPARAM(WINAMP_BUTTON2, BN_CLICKED), (LPARAM)0);
 	}
 }
-void NGWINAMP::pause(void) {
+void NGWINAMP::sn_pause(void) {
 	NGLOCKER lock(this);
 
 	if (this->pl_getlength() > 0) {
 		SendMessage(this->hplugin, WM_COMMAND, MAKEWPARAM(WINAMP_BUTTON3, BN_CLICKED), (LPARAM)0);
 	}
 }
-void NGWINAMP::stop(void) {
+void NGWINAMP::sn_stop(void) {
 	NGLOCKER lock(this);
 
 	if (this->pl_getlength() > 0) {
 		SendMessage(this->hplugin, WM_COMMAND, MAKEWPARAM(WINAMP_BUTTON4, BN_CLICKED), (LPARAM)0);
 	}
 }
-void NGWINAMP::next(void) {
+void NGWINAMP::sn_next(void) {
 	NGLOCKER lock(this);
 
 	if (this->pl_getlength() > 0) {
@@ -148,7 +164,7 @@ void NGWINAMP::sn_setpan(double pan) {
 double NGWINAMP::sn_getpos(void) {
 	NGLOCKER lock(this);
 
-	if (this->isplaying()) {
+	if (this->sn_isplaying()) {
 		return (double(SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)0, (LPARAM)IPC_GETOUTPUTTIME)) / double(this->sn_getlength()));
 	}
 	return 0.0;
@@ -156,7 +172,7 @@ double NGWINAMP::sn_getpos(void) {
 dword NGWINAMP::sn_getposms(void) {
 	NGLOCKER lock(this);
 
-	if (this->isplaying()) {
+	if (this->sn_isplaying()) {
 		return dword(SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)0, (LPARAM)IPC_GETOUTPUTTIME));
 	}
 	return 0;
@@ -170,7 +186,7 @@ void NGWINAMP::sn_setpos(double pos) {
 	if (pos > 1.0) {
 		pos = 1.0;
 	}
-	if (this->isplaying()) {
+	if (this->sn_isplaying()) {
 		dword sn_pos = dword(pos * this->sn_getlength());
 
 		SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)sn_pos, (LPARAM)IPC_JUMPTOTIME);
@@ -179,7 +195,7 @@ void NGWINAMP::sn_setpos(double pos) {
 dword NGWINAMP::sn_getlength(void) {
 	NGLOCKER lock(this);
 
-	if (this->isplaying()) {
+	if (this->sn_isplaying()) {
 		return dword(SendMessage(this->hplugin, WM_WA_IPC, (WPARAM)1, (LPARAM)IPC_GETOUTPUTTIME) * 1000);
 	}
 	return 0;

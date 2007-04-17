@@ -22,6 +22,8 @@ protected:
 
 	// winamp state
 	NETSNAPSHOT			snapshot;
+	NGTIMER				lastsnapshot;
+	double				snapshotinverval;
 
 	// requests
 	vector<NETDATA*>	requests;
@@ -30,6 +32,10 @@ protected:
 	// answers
 	vector<NETDATA*>	answers;
 	NGBUFFER			sendbuffer;
+
+	// statistics
+	dword				byte_in;
+	dword				byte_out;
 
 
 	bool	 main(void);
@@ -46,6 +52,11 @@ public:
 
 	void	 setflags(dword flags);
 	void	 settimeout(double timeout);
+	void	 setsnapshot(double inverval);
+	bool	 checksnapshot(void);
+
+	dword	 getbytein(void);
+	dword	 getbyteout(void);
 
 	bool	 isclosed(void);
 	void	 close(void);

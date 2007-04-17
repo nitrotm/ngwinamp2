@@ -14,6 +14,7 @@
 #define NGWINAMP_MIN_PANEL_WIDTH		50
 #define NGWINAMP_MIN_PANEL_HEIGHT		50
 #define NGWINAMP_TOOLBOX_TITLE_MARGIN	5
+#define NGWINAMP_SNAPSHOT_REFRESH		1.0
 
 /**
   * Localisation
@@ -21,6 +22,7 @@
   */
 #define NGWINAMP_BROWSER_ROOT			"shares"
 
+#define NGWINAMP_PL_HEADER_INDEX		"index"
 #define NGWINAMP_PL_HEADER_TITLE		"title"
 #define NGWINAMP_PL_HEADER_PATH			"path"
 

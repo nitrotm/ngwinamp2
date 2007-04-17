@@ -215,6 +215,12 @@
 					RelativePath=".\src\client\mainwnd.h">
 				</File>
 				<File
+					RelativePath=".\src\client\mainwnd_netevents.cpp">
+				</File>
+				<File
+					RelativePath=".\src\client\mainwnd_wndevents.cpp">
+				</File>
+				<File
 					RelativePath=".\src\client\ngwinampclient.cpp">
 				</File>
 				<File

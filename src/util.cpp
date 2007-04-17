@@ -166,6 +166,17 @@ vector<string> getdirectoryitems(const string &filename, const vector<string> &e
 	return items;
 }
 
+dword pathgetsize(const string &filename) {
+	HANDLE hFile = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	dword size = 0;
+
+	if (hFile != INVALID_HANDLE_VALUE) {
+		size = GetFileSize(hFile, NULL);
+		CloseHandle(hFile);
+	}
+	return size;
+}
+
 bool pathexists(const string &filename) {
 	if (PathFileExists(filename.c_str())) {
 		return true;
@@ -204,6 +215,18 @@ string pathappendslash(const string &filename) {
 	}
 	return filename;
 }
+
+string pathgetdirectory(const string &filename) {
+	char *buffer = new char[filename.length() + 1];
+	string path;
+
+	lstrcpy(buffer, filename.c_str());
+	PathRemoveFileSpec(buffer);
+	path = buffer;
+	delete [] buffer;
+	return path;
+}
+
 
 #ifdef _DEBUG
 
